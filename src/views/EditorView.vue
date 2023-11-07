@@ -1,11 +1,11 @@
 <template>
   <header>
-    <div class="title">页面编辑器{{ selectedComponentIdx }},{{ components.length }}</div>
+    <div class="title">页面编辑器{{ selectedSectionIdx }},{{ sections.length }},{{ dragging }}</div>
   </header>
   <div class="main-wrap">
     <aside>
-      <el-scrollbar :native="false" tag="section">
-        <draggable forceFallback="true" class="component-list" @start="dragging = true" @end="dragging = false" :list="ComponentList" item-key="id" tag="ul" :sort="false" :clone="dropComponent" :group="{ name: 'comp', pull: 'clone', put: false }">
+      <el-scrollbar :native="false">
+        <draggable forceFallback="true" class="components" @start="dragging = true" @end="dragging = false" :list="Components" item-key="id" tag="ul" :sort="false" :clone="dropComponent" :group="{ name: 'comp', pull: 'clone', put: false }">
           <template #item="{ element }">
             <li>
               <div style="width: 50px; height: 50px; border: 1px solid #f1f1f1; margin-bottom: 8px"></div>
@@ -16,35 +16,38 @@
       </el-scrollbar>
     </aside>
     <main @click="onClickOutside">
-      <el-scrollbar :native="false" tag="section" @scroll="handleScroll" ref="scrollRef">
-        <div class="components">
-          <div class="header wx-miniprogram">
-            <div class="title">首页</div>
-          </div>
-          <div class="tips" v-if="!components || components.length == 0">请点击组件或将组件拖动到这里</div>
-          <draggable forceFallback="true" handle=".handle" scrollSensitivity="200" @start="dragging = true" @end="dragging = false" style="min-height: 750px" draggable=".draggable" :list="components" item-key="id" chosen-class="draggable-chosen" ghost-class="draggable-ghost" group="comp" @change="onComponentDropped">
+      <el-scrollbar :native="false" @scroll="handleScroll" ref="scrollRef">
+        <div class="sections">
+          <draggable forceFallback="true" handle=".handle" scrollSensitivity="200" @start="sdragging = true" @end="dragging = false" style="min-height: 750px" :list="sections" item-key="id" chosen-class="draggable-chosen" ghost-class="draggable-ghost" group="comp" @change="onSectionDropped">
+            <template #header>
+              <div class="wrap header wx-miniprogram" :class="{ 'wrap-dragging': dragging }">
+                <div class="title">首页</div>
+              </div>
+              <div class="tips" v-if="!sections || sections.length == 0">请点击组件或将组件拖动到这里</div>
+            </template>
+
             <template #item="{ element, index }">
-              <div :class="{ draggable: element.draggable }">
+              <div>
                 <div style="position: relative">
-                  <div class="wrap handle" :class="{ active: index === selectedComponentIdx, 'wrap-dragging': dragging }" @mousedown.stop="editComponent($event, index)">
+                  <div class="wrap handle" :class="{ active: index === selectedSectionIdx, 'wrap-dragging': dragging }" @mousedown.stop="editComponent($event, index)">
                     <div style="height: 200px">
-                      <a href="aaaaa">{{ element.name }}</a>
+                      <component :is="componentList[element.type]" :index="index" :key="element.id"></component>
                     </div>
                   </div>
-                  <ul class="oprs" :class="{ show: index === selectedComponentIdx }">
+                  <ul class="oprs" :class="{ show: index === selectedSectionIdx }">
                     <li @click.stop="moveUpItem(index)" :class="{ disabled: index === 0 }">
                       <el-icon><Top /></el-icon>
                     </li>
-                    <li @click.stop="moveDownItem(index)" :class="{ disabled: index === components.length - 1 }">
+                    <li @click.stop="moveDownItem(index)" :class="{ disabled: index === sections.length - 1 }">
                       <el-icon><Bottom /></el-icon>
                     </li>
                     <li @click.stop="moveTopItem(index)" :class="{ disabled: index === 0 }">
                       <el-icon><Upload /></el-icon>
                     </li>
-                    <li @click.stop="moveBottomItem(index)" :class="{ disabled: index === components.length - 1 }">
+                    <li @click.stop="moveBottomItem(index)" :class="{ disabled: index === sections.length - 1 }">
                       <el-icon><Download /></el-icon>
                     </li>
-                    <li @click.stop="copyItem(index)" :class="{ disabled: index === components.length - 1 }">
+                    <li @click.stop="copyItem(index)" :class="{ disabled: index === sections.length - 1 }">
                       <el-icon><CopyDocument /></el-icon>
                     </li>
 
@@ -55,13 +58,35 @@
                 </div>
               </div>
             </template>
+
+            <template #footer>
+              <div class="footer"></div>
+            </template>
           </draggable>
-          <!-- <div class="striped-bg" style="width: 640px; height: 200px"></div> -->
         </div>
       </el-scrollbar>
     </main>
-    <aside class="navs">sdfsdsdfs</aside>
-    <aside class="props">sdfsdfsdf</aside>
+    <aside class="navs">
+      <div class="title">
+        <div class="text">页面导航</div>
+        <div class="close">
+          <el-icon><Close /></el-icon>
+        </div>
+      </div>
+      <el-scrollbar :native="false">
+        <draggable forceFallback="true" class="list" @start="dragging = true" @end="dragging = false" :list="sections" item-key="id" tag="ul" chosen-class="nav-draggable-chosen" @change="onSectionDropped">
+          <template #item="{ element }">
+            <li class="item">
+              <div></div>
+              <div class="title">{{ element.name }}</div>
+            </li>
+          </template>
+        </draggable>
+      </el-scrollbar>
+    </aside>
+    <aside class="props">
+      <component :is="selectedSectionIdx >= 0 && sections ? propsList[sections[selectedSectionIdx].type + 'Props'] : null" :index="selectedSectionIdx" :key="selectedSectionIdx"></component>
+    </aside>
   </div>
 </template>
 
@@ -69,22 +94,31 @@
 import { provide, ref, onMounted, computed, nextTick } from 'vue'
 import draggable from 'vuedraggable'
 import Utils from '../base/utils'
-import { ComponentList } from '../components/ComponentList'
+import { Components } from '../components/Components'
+import { Carousel, Image, RichText, Split, Text, CarouselProps, ImageProps, RichTextProps, SplitProps, TextProps } from '../components/'
 import { nanoid } from 'nanoid'
 
-const selectedComponentIdx = ref(-1)
-const components = ref([
-  { id: 'X9cNw_X0YpfIth6fRTMi2', name: '文本', icon: 'titletext.png', draggable: true },
-  { id: 'J458Foq2BDtT0rIbgQClX', name: '文本', icon: 'titletext.png', draggable: true },
-  { id: 'Q4tL3kpwZifUQ_sD059iC', name: '富文本', icon: 'Richtext.png', draggable: true },
-  { id: 'NGmOVLQ5g9fv4MrMRuV0C', name: '富文本', icon: 'Richtext.png', draggable: true },
-  { id: 'fEpRZSCDg1ie2n8zO-C2A', name: '富文本', icon: 'Richtext.png', draggable: true },
-  { id: 'qJOfwCwzipdRfGm_h56cL', name: '文本', icon: 'titletext.png', draggable: true },
-  { id: '3qq_9URpfd8cfu8DMwt4R', name: '富文本', icon: 'Richtext.png', draggable: true },
-  { id: 'Fdz_lCWcBcXcTJ-ZexK1C', name: '富文本', icon: 'Richtext.png', draggable: true }
-])
+const selectedSectionIdx = ref(-1)
+const sections = ref([])
 const dragging = ref(false)
 const scrollRef = ref(null)
+provide('sections', sections)
+provide('selectedSectionIdx', selectedSectionIdx)
+
+const componentList = {
+  Carousel,
+  Image,
+  RichText,
+  Split,
+  Text
+}
+const propsList = {
+  CarouselProps,
+  ImageProps,
+  RichTextProps,
+  SplitProps,
+  TextProps
+}
 
 // const PropsComponents = {
 //   MultiChoiceProps,
@@ -92,8 +126,14 @@ const scrollRef = ref(null)
 // }
 
 // const PropsComponent = computed(() => {
-//   return selectedComponentIdx.value >= 0 && topics.value ? PropsComponents[topics.value[selectedTopicIndex.value].type + 'Props'] : null
+//   return selectedSectionIdx.value >= 0 && topics.value ? PropsComponents[topics.value[selectedTopicIndex.value].type + 'Props'] : null
 // })
+
+function startDrag(e) {
+  dragging.value = true
+  // document.querySelector('.wrap.active>div').style.height = e.target.getBoundingClientRect().height
+  // console.log(document.querySelector('.wrap.active>div'))
+}
 
 // /* handle scroll
 function handleScroll(e) {
@@ -130,24 +170,23 @@ function dropComponent(payload) {
 
 function onClickOutside(e) {
   var elem = e.target
-  var targetArea = document.querySelector('.components')
+  var targetArea = document.querySelector('.sections')
   if (!targetArea.contains(elem)) {
-    selectedComponentIdx.value = -1
+    selectedSectionIdx.value = -1
   }
 }
 
-function onComponentDropped(e) {
+function onSectionDropped(e) {
   if (e.moved) {
-    selectedComponentIdx.value = e.moved.newIndex
+    selectedSectionIdx.value = e.moved.newIndex
   } else if (e.added) {
-    selectedComponentIdx.value = e.added.newIndex
+    selectedSectionIdx.value = e.added.newIndex
   }
 }
 
 function editComponent(e, idx) {
   e.target.blur()
-  console.log(e.target)
-  selectedComponentIdx.value = idx
+  selectedSectionIdx.value = idx
 }
 
 function moveUpItem(idx) {
@@ -156,7 +195,7 @@ function moveUpItem(idx) {
 }
 
 function moveDownItem(idx) {
-  if (idx === components.value.length - 1) return
+  if (idx === sections.value.length - 1) return
   swapItem(idx, idx + 1)
 }
 
@@ -166,40 +205,40 @@ function moveTopItem(idx) {
 }
 
 function moveBottomItem(idx) {
-  if (idx === components.value.length - 1) return
-  swapItem(idx, components.value.length - 1)
+  if (idx === sections.value.length - 1) return
+  swapItem(idx, sections.value.length - 1)
 }
 
 function swapItem(idx1, idx2) {
-  let t = components.value[idx2]
-  components.value.splice(idx2, 1, components.value[idx1])
-  components.value[idx1] = t
-  selectedComponentIdx.value = idx2
+  let t = sections.value[idx2]
+  sections.value.splice(idx2, 1, sections.value[idx1])
+  sections.value[idx1] = t
+  selectedSectionIdx.value = idx2
   nextTick(() => {
     fixPos()
   })
 }
 
 function copyItem(idx) {
-  const newItem = Utils.deepCopyJson(components.value[idx])
+  const newItem = Utils.deepCopyJson(sections.value[idx])
   newItem.id = nanoid()
-  components.value.splice(idx, 0, newItem)
-  selectedComponentIdx.value++
-  console.log(components.value)
+  sections.value.splice(idx, 0, newItem)
+  selectedSectionIdx.value++
+  console.log(sections.value)
   nextTick(() => {
     fixPos()
   })
 }
 
 function deleteItem(idx) {
-  components.value.splice(idx, 1)
-  if (idx === components.value.length) {
-    selectedComponentIdx.value = components.value.length - 1
-  } else if (components.value.length === 0) {
-    selectedComponentIdx.value = -1
+  sections.value.splice(idx, 1)
+  if (idx === sections.value.length) {
+    selectedSectionIdx.value = sections.value.length - 1
+  } else if (sections.value.length === 0) {
+    selectedSectionIdx.value = -1
   }
   nextTick(() => {
-    fixPos()
+    if (sections.value.length) fixPos()
   })
 }
 
@@ -272,7 +311,7 @@ aside {
   min-width: 180px;
 }
 
-.component-list {
+.components {
   margin: 18px;
   padding: 0;
   display: flex;
@@ -296,14 +335,14 @@ main {
   flex-grow: 2;
 }
 
-.components {
+.sections {
   position: relative;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   width: 375px;
   min-height: 812px;
-  background: #fff;
+  background-color: #fff;
   margin: 40px auto 100px auto;
   user-select: none;
   box-shadow: 0px 0px 8px 4px rgba(0, 0, 0, 0.05);
@@ -338,7 +377,7 @@ main {
   .wrap {
     position: relative;
     user-select: none;
-    background: #fff;
+    background-color: #fff;
 
     &::before {
       content: '';
@@ -422,12 +461,6 @@ main {
   .show {
     display: block;
   }
-  // .outline {
-  //   position: relative;
-  //   width: 375px;
-  //   height: 100%;
-  //   border: 2px dotted red;
-  // }
 }
 
 .sticky {
@@ -435,19 +468,10 @@ main {
   top: 60px;
 }
 
-.bottom {
-  position: absolute;
-  bottom: 0;
-}
-
 .props {
   width: 360px;
   min-width: 360px;
 }
-
-// .draggable-chosen {
-//   background: blue;
-// }
 
 .draggable-chosen {
   .oprs {
@@ -471,6 +495,42 @@ main {
 
   div {
     display: none;
+  }
+}
+
+.navs {
+  box-shadow: 0 0 4px 4px rgba(0, 0, 0, 0.05);
+  > .title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 40px;
+    background-color: #f1f4f4;
+    padding: 12px;
+
+    .text {
+      font-size: 14px;
+    }
+    .close {
+      height: 1.2em;
+      font-size: 1.2em;
+      margin: 0;
+    }
+  }
+  .list {
+    li {
+      height: 40px;
+      line-height: 40px;
+      padding-left: 16px;
+      border: 1px solid #f1f1f1;
+      background-color: #fff;
+      cursor: pointer;
+    }
+    li.nav-draggable-chosen {
+      background-color: #155bd4;
+      border: 0;
+      color: #fff;
+    }
   }
 }
 </style>
