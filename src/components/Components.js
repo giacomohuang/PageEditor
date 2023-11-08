@@ -15,7 +15,7 @@ export const Components = [
   {
     id: 3,
     type: 'Split',
-    name: '分割线',
+    name: '分割',
     icon: 'split.png'
   },
   {

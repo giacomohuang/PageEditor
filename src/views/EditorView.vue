@@ -65,27 +65,35 @@
           </draggable>
         </div>
       </el-scrollbar>
+      <div class="nav-btn" @click.stop="toggleNav">
+        <el-icon><Memo style="padding-top: 4px" /></el-icon> <span>页面导航</span>
+      </div>
     </main>
     <aside class="navs">
       <div class="title">
         <div class="text">页面导航</div>
-        <div class="close">
+        <div class="close" @click.stop="toggleNav">
           <el-icon><Close /></el-icon>
         </div>
       </div>
       <el-scrollbar :native="false">
-        <draggable forceFallback="true" class="list" @start="dragging = true" @end="dragging = false" :list="sections" item-key="id" tag="ul" chosen-class="nav-draggable-chosen" @change="onSectionDropped">
-          <template #item="{ element }">
-            <li class="item">
-              <div></div>
-              <div class="title">{{ element.name }}</div>
+        <draggable forceFallback="true" class="list" @start="dragging = true" @end="dragging = false" :list="sections" item-key="id" handle=".handle" tag="ul" chosen-class="nav-draggable-chosen" @change="onSectionDropped">
+          <template #item="{ index, element }">
+            <li @click.stop="selectedSectionIdx = index" class="item" :class="{ selected: selectedSectionIdx === index }">
+              <div class="title">
+                <icon id="#icon-tuodong" class="handle" />
+                <span>{{ index + 1 }}. {{ element.name }}</span>
+                <span class="del" @click.stop="deleteItem(index)"
+                  ><el-icon><Delete /></el-icon
+                ></span>
+              </div>
             </li>
           </template>
         </draggable>
       </el-scrollbar>
     </aside>
     <aside class="props">
-      <component :is="selectedSectionIdx >= 0 && sections ? propsList[sections[selectedSectionIdx].type + 'Props'] : null" :index="selectedSectionIdx" :key="selectedSectionIdx"></component>
+      <component :is="PropsComponent" :index="selectedSectionIdx" :key="selectedSectionIdx"></component>
     </aside>
   </div>
 </template>
@@ -95,6 +103,7 @@ import { provide, ref, onMounted, computed, nextTick } from 'vue'
 import draggable from 'vuedraggable'
 import Utils from '../base/utils'
 import { Components } from '../components/Components'
+import Icon from '../components/Icon.vue'
 import { Carousel, Image, RichText, Split, Text, CarouselProps, ImageProps, RichTextProps, SplitProps, TextProps } from '../components/'
 import { nanoid } from 'nanoid'
 
@@ -102,6 +111,7 @@ const selectedSectionIdx = ref(-1)
 const sections = ref([])
 const dragging = ref(false)
 const scrollRef = ref(null)
+let navShow = true
 provide('sections', sections)
 provide('selectedSectionIdx', selectedSectionIdx)
 
@@ -125,15 +135,9 @@ const propsList = {
 //   SingleChoiceProps
 // }
 
-// const PropsComponent = computed(() => {
-//   return selectedSectionIdx.value >= 0 && topics.value ? PropsComponents[topics.value[selectedTopicIndex.value].type + 'Props'] : null
-// })
-
-function startDrag(e) {
-  dragging.value = true
-  // document.querySelector('.wrap.active>div').style.height = e.target.getBoundingClientRect().height
-  // console.log(document.querySelector('.wrap.active>div'))
-}
+const PropsComponent = computed(() => {
+  return selectedSectionIdx.value >= 0 && sections.value ? propsList[sections.value[selectedSectionIdx.value].type + 'Props'] : null
+})
 
 // /* handle scroll
 function handleScroll(e) {
@@ -232,11 +236,12 @@ function copyItem(idx) {
 
 function deleteItem(idx) {
   sections.value.splice(idx, 1)
-  if (idx === sections.value.length) {
+  if (idx < selectedSectionIdx.value) {
+    selectedSectionIdx.value--
+  } else if (selectedSectionIdx.value === sections.value.length) {
     selectedSectionIdx.value = sections.value.length - 1
-  } else if (sections.value.length === 0) {
-    selectedSectionIdx.value = -1
   }
+
   nextTick(() => {
     if (sections.value.length) fixPos()
   })
@@ -256,6 +261,19 @@ function fixPos() {
   }
 }
 
+function toggleNav() {
+  console.log('toggle')
+  if (navShow) {
+    document.querySelector('.navs').style.display = 'none'
+    document.querySelector('.nav-btn').style.display = 'block'
+    navShow = false
+    // document.querySelector()
+  } else {
+    document.querySelector('.navs').style.display = ''
+    document.querySelector('.nav-btn').style.display = 'none'
+    navShow = true
+  }
+}
 /*
 // function addClass(el, className) {
 //   className.split(' ').forEach((cName) => {
@@ -306,11 +324,6 @@ aside {
   border-right: 1px solid #f1f1fa;
 }
 
-.navs {
-  width: 180px;
-  min-width: 180px;
-}
-
 .components {
   margin: 18px;
   padding: 0;
@@ -329,6 +342,7 @@ aside {
 }
 
 main {
+  position: relative;
   min-width: 620px;
   border-right: 1px solid #f1f1fa;
   background: #f0f0f2;
@@ -391,7 +405,7 @@ main {
       border: 0;
     }
     &:hover::before {
-      border: 2px dotted #155bd4;
+      border: 2px dotted var(--color-main-highlight);
     }
   }
 
@@ -430,7 +444,7 @@ main {
       color: #666;
       &:hover {
         color: #fff;
-        background: #155bd4;
+        background: var(--color-main-highlight);
       }
       &:not(:first-child) {
         border-top: 1px solid #f1f1f1;
@@ -449,12 +463,12 @@ main {
   .active {
     &:hover::before {
       z-index: 101;
-      border: 2px solid #155bd4;
+      border: 2px solid var(--color-main-highlight);
     }
 
     &::before {
       z-index: 101;
-      border: 2px solid #155bd4;
+      border: 2px solid var(--color-main-highlight);
     }
   }
 
@@ -498,8 +512,30 @@ main {
   }
 }
 
-.navs {
+.nav-btn {
+  position: absolute;
+  display: none;
+  top: 15px;
+  right: 15px;
+  width: 100px;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  font-size: 14px;
+  border: 1px solid #ddd;
   box-shadow: 0 0 4px 4px rgba(0, 0, 0, 0.05);
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.navs {
+  user-select: none;
+  width: 180px;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  // box-shadow: 0 0 4px 4px rgba(0, 0, 0, 0.05);
   > .title {
     display: flex;
     justify-content: space-between;
@@ -507,29 +543,60 @@ main {
     height: 40px;
     background-color: #f1f4f4;
     padding: 12px;
+  }
+  .text {
+    font-size: 14px;
+  }
+  .close {
+    height: 1.2em;
+    font-size: 1.2em;
+    margin: 0;
+    cursor: pointer;
+  }
 
-    .text {
-      font-size: 14px;
+  .item {
+    position: relative;
+    height: 40px;
+    line-height: 40px;
+    padding-left: 5px;
+    border: 1px solid #f1f1f1;
+    background-color: #fff;
+
+    &:hover .handle {
+      visibility: visible;
     }
-    .close {
-      height: 1.2em;
-      font-size: 1.2em;
-      margin: 0;
+    &:hover .del {
+      display: inline-block;
+    }
+    &.selected {
+      border: 1px solid var(--color-main-highlight);
     }
   }
-  .list {
-    li {
-      height: 40px;
-      line-height: 40px;
-      padding-left: 16px;
-      border: 1px solid #f1f1f1;
-      background-color: #fff;
-      cursor: pointer;
+  .item.nav-draggable-chosen {
+    background-color: var(--color-main-highlight);
+    border: 0;
+    color: #fff;
+  }
+
+  .handle {
+    visibility: hidden;
+    color: #999;
+    &:hover {
+      color: var(--color-main-highlight);
+      cursor: move;
     }
-    li.nav-draggable-chosen {
-      background-color: #155bd4;
-      border: 0;
-      color: #fff;
+    margin: auto 4px;
+  }
+
+  .del {
+    padding-top: 2px;
+    display: none;
+    position: absolute;
+    right: 8px;
+
+    &:hover {
+      color: var(--color-main-highlight);
+      cursor: pointer;
     }
   }
 }
