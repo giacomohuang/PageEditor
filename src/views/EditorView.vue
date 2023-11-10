@@ -114,6 +114,7 @@
 
     <!--属性 -->
     <aside class="props">
+      <div class="title"></div>
       <component :is="PropsComponent" :index="selectedSectionIdx" :key="selectedSectionIdx"></component>
     </aside>
   </div>
@@ -300,7 +301,7 @@ function deleteItem(idx) {
 }
 
 function fixPos() {
-  const rect = document.querySelector('.wrap.active').getBoundingClientRect()
+  const rect = document.querySelector('.sections .item.active').getBoundingClientRect()
   const scrollTop = scrollRef.value.$el.children[0].scrollTop
   const windowHeight = window.innerHeight
   var topOffset = rect.top + scrollTop
@@ -531,11 +532,6 @@ main {
   top: 60px;
 }
 
-.props {
-  width: 360px;
-  min-width: 360px;
-}
-
 .section-chosen {
   pointer-events: auto;
   .oprs {
@@ -650,6 +646,10 @@ main {
       cursor: pointer;
     }
   }
+
+  .footer {
+    height: 40px;
+  }
 }
 
 .nav-chosen .item {
@@ -657,7 +657,8 @@ main {
   color: #fff !important;
 }
 
-.footer {
-  height: 40px;
+.props {
+  width: 360px;
+  min-width: 360px;
 }
 </style>
