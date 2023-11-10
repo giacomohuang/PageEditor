@@ -1,16 +1,18 @@
 <template>
-  <header>
-    <div class="title">页面编辑器{{ selectedSectionIdx }},{{ sections.length }},{{ dragging }}</div>
+  <header :class="{ dragfix: dragging }">
+    <div class="title">页面编辑器{{ selectedSectionIdx }},{{ sections.length }},{{ dragging }}<a href="sdfsdfs">sdfsdfsdfsdf</a></div>
   </header>
   <div class="main-wrap">
     <aside>
       <el-scrollbar :native="false">
-        <draggable forceFallback="true" class="components" @start="dragging = true" @end="dragging = false" :list="Components" item-key="id" tag="ul" :sort="false" :clone="dropComponent" :group="{ name: 'comp', pull: 'clone', put: false }">
+        <draggable forceFallback="true" class="components" @start="dragStart" @end="dragEnd" :list="Components" ghost-class="component-ghost" drag-class="component-drag" item-key="id" :sort="false" :clone="dropComponent" :group="{ name: 'comp', pull: 'clone', put: false }">
           <template #item="{ element }">
-            <li>
-              <div style="width: 50px; height: 50px; border: 1px solid #f1f1f1; margin-bottom: 8px"></div>
-              <div>{{ element.name }}</div>
-            </li>
+            <div class="relative">
+              <div class="item">
+                <div style="width: 50px; height: 50px; border: 1px solid #f1f1f1; margin-bottom: 8px"></div>
+                <div>{{ element.name }}</div>
+              </div>
+            </div>
           </template>
         </draggable>
       </el-scrollbar>
@@ -18,18 +20,17 @@
     <main @click="onClickOutside">
       <el-scrollbar :native="false" @scroll="handleScroll" ref="scrollRef">
         <div class="sections">
-          <draggable forceFallback="true" handle=".handle" scrollSensitivity="200" @start="sdragging = true" @end="dragging = false" style="min-height: 750px" :list="sections" item-key="id" chosen-class="draggable-chosen" ghost-class="draggable-ghost" group="comp" @change="onSectionDropped">
-            <template #header>
-              <div class="wrap header wx-miniprogram" :class="{ 'wrap-dragging': dragging }">
-                <div class="title">首页</div>
-              </div>
-              <div class="tips" v-if="!sections || sections.length == 0">请点击组件或将组件拖动到这里</div>
-            </template>
-
+          <!--header -->
+          <div class="wrap" @click.stop="selectedSectionIdx = -100" :class="{ active: selectedSectionIdx === -100, dragfix: dragging }">
+            <HeaderNav></HeaderNav>
+          </div>
+          <div class="tips" v-if="!sections || sections.length == 0">请点击组件或将组件拖动到这里</div>
+          <!--body -->
+          <draggable forceFallback="true" handle=".handle" scrollSensitivity="200" @start="dragStart" @end="dragEnd" style="min-height: 750px" :list="sections" item-key="id" chosen-class="section-chosen" ghost-class="section-ghost" group="comp" @change="onSectionDropped">
             <template #item="{ element, index }">
               <div>
-                <div style="position: relative">
-                  <div class="wrap handle" :class="{ active: index === selectedSectionIdx, 'wrap-dragging': dragging }" @mousedown.stop="editComponent($event, index)">
+                <div class="relative">
+                  <div class="wrap handle" :class="{ active: index === selectedSectionIdx, dragfix: dragging }" @mousedown.stop="editComponent($event, index)">
                     <div style="height: 200px">
                       <component :is="componentList[element.type]" :index="index" :key="element.id"></component>
                     </div>
@@ -50,7 +51,6 @@
                     <li @click.stop="copyItem(index)" :class="{ disabled: index === sections.length - 1 }">
                       <el-icon><CopyDocument /></el-icon>
                     </li>
-
                     <li @click.stop="deleteItem(index)">
                       <el-icon><Delete /></el-icon>
                     </li>
@@ -58,17 +58,19 @@
                 </div>
               </div>
             </template>
-
-            <template #footer>
-              <div class="footer"></div>
-            </template>
           </draggable>
+          <!--footer -->
+          <div class="wrap footer" @click.stop="selectedSectionIdx = -200" :class="{ hide: !sectionFooter.enabled, active: selectedSectionIdx === -200, dragfix: dragging }">
+            <div>底部</div>
+          </div>
         </div>
       </el-scrollbar>
       <div class="nav-btn" @click.stop="toggleNav">
         <el-icon><Memo style="padding-top: 4px" /></el-icon> <span>页面导航</span>
       </div>
     </main>
+
+    <!--页面导航 -->
     <aside class="navs">
       <div class="title">
         <div class="text">页面导航</div>
@@ -77,21 +79,40 @@
         </div>
       </div>
       <el-scrollbar :native="false">
-        <draggable forceFallback="true" class="list" @start="dragging = true" @end="dragging = false" :list="sections" item-key="id" handle=".handle" tag="ul" chosen-class="nav-draggable-chosen" @change="onSectionDropped">
-          <template #item="{ index, element }">
-            <li @click.stop="selectedSectionIdx = index" class="item" :class="{ selected: selectedSectionIdx === index }">
-              <div class="title">
-                <icon id="#icon-tuodong" class="handle" />
-                <span>{{ index + 1 }}. {{ element.name }}</span>
-                <span class="del" @click.stop="deleteItem(index)"
-                  ><el-icon><Delete /></el-icon
-                ></span>
+        <draggable forceFallback="true" :options="{ direction: 'vertical' }" class="list" @start="dragStart" @end="dragEnd" :list="sections" item-key="id" handle=".handle" chosen-class="nav-chosen" @change="onSectionDropped">
+          <template #header>
+            <div class="relative">
+              <div @click.stop="selectedSectionIdx = -100" :class="{ selected: selectedSectionIdx === -100, dragfix: dragging }" class="item" style="padding-left: 20px">
+                <div class="title">0. 头部导航栏</div>
               </div>
-            </li>
+            </div>
+          </template>
+          <template #item="{ index, element }">
+            <div class="relative">
+              <div @click.stop="selectedSectionIdx = index" class="item" :class="{ selected: selectedSectionIdx === index, dragfix: dragging }">
+                <div class="title">
+                  <icon id="#icon-tuodong" class="handle" />
+                  <span>{{ index + 1 }}. {{ element.name }}</span>
+                  <span class="del" @click.stop="deleteItem(index)"
+                    ><el-icon><Delete /></el-icon
+                  ></span>
+                </div>
+              </div>
+            </div>
+          </template>
+          <template #footer>
+            <div class="relative">
+              <div @click.stop="selectedSectionIdx = -200" :class="{ selected: selectedSectionIdx === -200, dragfix: dragging }" class="item flex-between" style="padding: 0 8px 0 20px">
+                <div class="title">{{ sections.length + 1 }}. 底部导航栏</div>
+                <el-switch v-model="sectionFooter.enabled" size="small" />
+              </div>
+            </div>
           </template>
         </draggable>
       </el-scrollbar>
     </aside>
+
+    <!--属性 -->
     <aside class="props">
       <component :is="PropsComponent" :index="selectedSectionIdx" :key="selectedSectionIdx"></component>
     </aside>
@@ -99,16 +120,17 @@
 </template>
 
 <script setup>
-import { provide, ref, onMounted, computed, nextTick } from 'vue'
+import { provide, ref, computed, nextTick } from 'vue'
 import draggable from 'vuedraggable'
 import Utils from '../base/utils'
 import { Components } from '../components/Components'
 import Icon from '../components/Icon.vue'
-import { Carousel, Image, RichText, Split, Text, CarouselProps, ImageProps, RichTextProps, SplitProps, TextProps } from '../components/'
+import { HeaderNav, FooterNav, Carousel, Image, RichText, Split, Text, CarouselProps, HeaderNavProps, FooterNavProps, ImageProps, RichTextProps, SplitProps, TextProps } from '../components/'
 import { nanoid } from 'nanoid'
 
 const selectedSectionIdx = ref(-1)
 const sections = ref([])
+const sectionFooter = ref({ enabled: true })
 const dragging = ref(false)
 const scrollRef = ref(null)
 let navShow = true
@@ -120,14 +142,18 @@ const componentList = {
   Image,
   RichText,
   Split,
-  Text
+  Text,
+  HeaderNav,
+  FooterNav
 }
 const propsList = {
   CarouselProps,
   ImageProps,
   RichTextProps,
   SplitProps,
-  TextProps
+  TextProps,
+  HeaderNavProps,
+  FooterNavProps
 }
 
 // const PropsComponents = {
@@ -136,8 +162,32 @@ const propsList = {
 // }
 
 const PropsComponent = computed(() => {
-  return selectedSectionIdx.value >= 0 && sections.value ? propsList[sections.value[selectedSectionIdx.value].type + 'Props'] : null
+  if (selectedSectionIdx.value === -100) {
+    return propsList['HeaderNavProps']
+  } else if (selectedSectionIdx.value === -200) {
+    return propsList['FooterNavProps']
+  } else {
+    return selectedSectionIdx.value >= 0 && sections.value ? propsList[sections.value[selectedSectionIdx.value].type + 'Props'] : null
+  }
 })
+
+function dragStart() {
+  dragging.value = true
+  //fix Draggble css
+  let ElList = document.querySelectorAll('.components>div:not(.component-drag)')
+  ElList.forEach((item) => {
+    item.classList.add('nohover')
+  })
+}
+
+function dragEnd() {
+  dragging.value = false
+  //fix Draggble css
+  let ElList = document.querySelectorAll('.components>div:not(.component-drag)')
+  ElList.forEach((item) => {
+    item.classList.remove('nohover')
+  })
+}
 
 // /* handle scroll
 function handleScroll(e) {
@@ -267,7 +317,6 @@ function toggleNav() {
     document.querySelector('.navs').style.display = 'none'
     document.querySelector('.nav-btn').style.display = 'block'
     navShow = false
-    // document.querySelector()
   } else {
     document.querySelector('.navs').style.display = ''
     document.querySelector('.nav-btn').style.display = 'none'
@@ -290,6 +339,10 @@ function toggleNav() {
 </script>
 
 <style lang="scss">
+.dragfix {
+  pointer-events: none;
+}
+
 header {
   display: flex;
   flex-direction: row;
@@ -331,14 +384,32 @@ aside {
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: stretch;
-  li {
+  .item {
     width: 80px;
     padding: 5px;
     display: flex;
     flex-direction: column;
     align-items: center;
     cursor: pointer;
+    &:hover {
+      background-color: var(--color-main-highlight);
+      color: #fff;
+    }
   }
+  .nohover .item:hover {
+    background-color: #fff;
+    color: var(--color-text);
+  }
+}
+
+.component-drag .item {
+  background-color: var(--color-main-highlight);
+  color: #fff;
+}
+
+.component-ghost .item {
+  background-color: #fff;
+  color: var(--color-text);
 }
 
 main {
@@ -346,36 +417,18 @@ main {
   min-width: 620px;
   border-right: 1px solid #f1f1fa;
   background: #f0f0f2;
-  flex-grow: 2;
 }
 
 .sections {
   position: relative;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
+
   width: 375px;
   min-height: 812px;
   background-color: #fff;
   margin: 40px auto 100px auto;
   user-select: none;
   box-shadow: 0px 0px 8px 4px rgba(0, 0, 0, 0.05);
-
-  .header {
-    width: 375px;
-    height: 90px;
-  }
-  .wx-miniprogram {
-    background-image: url('../assets/img/wx_miniprogram_header@2x.png');
-    background-size: 100%;
-  }
-
-  .title {
-    font-size: 18px;
-    position: relative;
-    top: 52px;
-    text-align: center;
-  }
 
   .tips {
     position: absolute;
@@ -387,7 +440,9 @@ main {
     border: 1px dashed #c1c1c1;
     text-align: center;
   }
-
+  .flex-start {
+    align-self: flex-start;
+  }
   .wrap {
     position: relative;
     user-select: none;
@@ -409,21 +464,6 @@ main {
     }
   }
 
-  // fix hover style when dragging
-  .wrap-dragging {
-    &::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-    }
-    &:hover::before {
-      border: 0px;
-    }
-  }
-
   .oprs {
     position: absolute;
     display: none;
@@ -435,6 +475,7 @@ main {
     box-shadow: 0px 0px 4px 4px rgba(0, 0, 0, 0.05);
     // z-index: 100;
     li {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -487,13 +528,14 @@ main {
   min-width: 360px;
 }
 
-.draggable-chosen {
+.section-chosen {
+  pointer-events: auto;
   .oprs {
     display: none;
   }
 }
 
-.draggable-ghost {
+.section-ghost {
   background-size: 8px 8px; /* 控制条纹的大小 */
   background-color: rgb(147, 202, 236);
   background-image: -webkit-gradient(linear, 0 0, 100% 100%, color-stop(0.25, rgba(255, 255, 255, 0.2)), color-stop(0.25, transparent), color-stop(0.5, transparent), color-stop(0.5, rgba(255, 255, 255, 0.2)), color-stop(0.75, rgba(255, 255, 255, 0.2)), color-stop(0.75, transparent), to(transparent));
@@ -505,7 +547,7 @@ main {
   border-radius: 0;
   border: 0;
   list-style: none;
-  height: 40px;
+  height: 200px;
 
   div {
     display: none;
@@ -535,7 +577,7 @@ main {
   min-width: 180px;
   display: flex;
   flex-direction: column;
-  // box-shadow: 0 0 4px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 0 4px 4px rgba(0, 0, 0, 0.05);
   > .title {
     display: flex;
     justify-content: space-between;
@@ -558,7 +600,6 @@ main {
     position: relative;
     height: 40px;
     line-height: 40px;
-    padding-left: 5px;
     border: 1px solid #f1f1f1;
     background-color: #fff;
 
@@ -572,20 +613,15 @@ main {
       border: 1px solid var(--color-main-highlight);
     }
   }
-  .item.nav-draggable-chosen {
-    background-color: var(--color-main-highlight);
-    border: 0;
-    color: #fff;
-  }
 
   .handle {
+    margin: 0 3px 0 3px;
     visibility: hidden;
     color: #999;
     &:hover {
       color: var(--color-main-highlight);
       cursor: move;
     }
-    margin: auto 4px;
   }
 
   .del {
@@ -599,5 +635,15 @@ main {
       cursor: pointer;
     }
   }
+}
+
+.nav-chosen .item {
+  background-color: var(--color-main-highlight) !important;
+  border: 0 !important;
+  color: #fff !important;
+}
+
+.footer {
+  height: 40px;
 }
 </style>

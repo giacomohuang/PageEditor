@@ -1,3 +1,7 @@
+export { default as HeaderNav } from './HeaderNav.vue'
+export { default as HeaderNavProps } from './HeaderNavProps.vue'
+export { default as FooterNav } from './FooterNav.vue'
+export { default as FooterNavProps } from './FooterNavProps.vue'
 export { default as Carousel } from './Carousel.vue'
 export { default as CarouselProps } from './CarouselProps.vue'
 export { default as Image } from './Image.vue'
