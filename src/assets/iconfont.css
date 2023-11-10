@@ -1,141 +1,40 @@
 @font-face {
-  font-family: "iconfont"; /* Project id 3829672 */
-  src: url('iconfont.svg?t=1671426101453#iconfont') format('svg');
+  font-family: 'iconfont'; /* Project id 4324883 */
+  src:
+    url('iconfont.woff2?t=1699599640351') format('woff2'),
+    url('iconfont.woff?t=1699599640351') format('woff'),
+    url('iconfont.ttf?t=1699599640351') format('truetype'),
+    url('iconfont.svg?t=1699599640351#iconfont') format('svg');
 }
 
 .iconfont {
-  font-family: "iconfont" !important;
+  font-family: 'iconfont' !important;
   font-size: 16px;
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-tuodong:before {
-  content: "\e6ff";
+.-ico-richtext:before {
+  content: '\e604';
 }
 
-.icon-HTMLyuanma:before {
-  content: "\e622";
+.-ico-handle:before {
+  content: '\e605';
 }
 
-.icon-yulan:before {
-  content: "\e623";
+.-ico-carousel:before {
+  content: '\e606';
 }
 
-.icon-chexiao:before {
-  content: "\e624";
+.-ico-image:before {
+  content: '\e600';
 }
 
-.icon-huifu:before {
-  content: "\e625";
+.-ico-split:before {
+  content: '\e601';
 }
 
-.icon-cuti:before {
-  content: "\e626";
+.-ico-text:before {
+  content: '\e602';
 }
-
-.icon-xieti:before {
-  content: "\e627";
-}
-
-.icon-shanchuxian:before {
-  content: "\e628";
-}
-
-.icon-xiahuaxian:before {
-  content: "\e629";
-}
-
-.icon-liangduanduiqi:before {
-  content: "\e62a";
-}
-
-.icon-juzhongduiqi:before {
-  content: "\e62b";
-}
-
-.icon-youduiqi:before {
-  content: "\e62c";
-}
-
-.icon-zuoduiqi:before {
-  content: "\e62d";
-}
-
-.icon-jianshaosuojin:before {
-  content: "\e62e";
-}
-
-.icon-qingchugeshi:before {
-  content: "\e62f";
-}
-
-.icon-shangbiao:before {
-  content: "\e630";
-}
-
-.icon-xiabiao:before {
-  content: "\e631";
-}
-
-.icon-yinyong:before {
-  content: "\e632";
-}
-
-.icon-zengjiasuojin:before {
-  content: "\e633";
-}
-
-.icon-bianjidaimashili:before {
-  content: "\e634";
-}
-
-.icon-bianjilianjie:before {
-  content: "\e635";
-}
-
-.icon-bianjitupian:before {
-  content: "\e636";
-}
-
-.icon-bianjimeiti:before {
-  content: "\e637";
-}
-
-.icon-fenyefu:before {
-  content: "\e638";
-}
-
-.icon-biaoge:before {
-  content: "\e639";
-}
-
-.icon-shuipingfengexian:before {
-  content: "\e63a";
-}
-
-.icon-quanping:before {
-  content: "\e63b";
-}
-
-.icon-fuhaoliebiao:before {
-  content: "\e63c";
-}
-
-.icon-beijingse:before {
-  content: "\e63d";
-}
-
-.icon-wenziyanse:before {
-  content: "\e63e";
-}
-
-.icon-fuhaoliebiao2:before {
-  content: "\e63f";
-}
-
-.icon-fuhaoliebiao3:before {
-  content: "\e640";
-}
-

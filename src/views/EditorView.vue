@@ -1,6 +1,6 @@
 <template>
   <header :class="{ dragfix: dragging }">
-    <div class="title">页面编辑器{{ selectedSectionIdx }},{{ sections.length }},{{ dragging }}<a href="sdfsdfs">sdfsdfsdfsdf</a></div>
+    <div class="title">页面编辑器{{ selectedSectionIdx }},{{ sections.length }},{{ dragging }}</div>
   </header>
   <div class="main-wrap">
     <aside>
@@ -9,7 +9,7 @@
           <template #item="{ element }">
             <div class="relative">
               <div class="item">
-                <div style="width: 50px; height: 50px; border: 1px solid #f1f1f1; margin-bottom: 8px"></div>
+                <div class="icon"><icon :id="element.icon" class="icon handle" /></div>
                 <div>{{ element.name }}</div>
               </div>
             </div>
@@ -21,7 +21,7 @@
       <el-scrollbar :native="false" @scroll="handleScroll" ref="scrollRef">
         <div class="sections">
           <!--header -->
-          <div class="wrap" @click.stop="selectedSectionIdx = -100" :class="{ active: selectedSectionIdx === -100, dragfix: dragging }">
+          <div class="item" @click.stop="selectedSectionIdx = -100" :class="{ active: selectedSectionIdx === -100, dragfix: dragging }">
             <HeaderNav></HeaderNav>
           </div>
           <div class="tips" v-if="!sections || sections.length == 0">请点击组件或将组件拖动到这里</div>
@@ -30,7 +30,7 @@
             <template #item="{ element, index }">
               <div>
                 <div class="relative">
-                  <div class="wrap handle" :class="{ active: index === selectedSectionIdx, dragfix: dragging }" @mousedown.stop="editComponent($event, index)">
+                  <div class="item handle" :class="{ active: index === selectedSectionIdx, dragfix: dragging }" @mousedown.stop="editComponent($event, index)">
                     <div style="height: 200px">
                       <component :is="componentList[element.type]" :index="index" :key="element.id"></component>
                     </div>
@@ -60,7 +60,7 @@
             </template>
           </draggable>
           <!--footer -->
-          <div class="wrap footer" @click.stop="selectedSectionIdx = -200" :class="{ hide: !sectionFooter.enabled, active: selectedSectionIdx === -200, dragfix: dragging }">
+          <div class="item footer" @click.stop="selectedSectionIdx = -200" :class="{ hide: !sectionFooter.enabled, active: selectedSectionIdx === -200, dragfix: dragging }">
             <div>底部</div>
           </div>
         </div>
@@ -83,7 +83,7 @@
           <template #header>
             <div class="relative">
               <div @click.stop="selectedSectionIdx = -100" :class="{ selected: selectedSectionIdx === -100, dragfix: dragging }" class="item" style="padding-left: 20px">
-                <div class="title">0. 头部导航栏</div>
+                <div class="title">0. 头部导航</div>
               </div>
             </div>
           </template>
@@ -91,7 +91,7 @@
             <div class="relative">
               <div @click.stop="selectedSectionIdx = index" class="item" :class="{ selected: selectedSectionIdx === index, dragfix: dragging }">
                 <div class="title">
-                  <icon id="#icon-tuodong" class="handle" />
+                  <icon id="#-ico-handle" class="handle" />
                   <span>{{ index + 1 }}. {{ element.name }}</span>
                   <span class="del" @click.stop="deleteItem(index)"
                     ><el-icon><Delete /></el-icon
@@ -103,7 +103,7 @@
           <template #footer>
             <div class="relative">
               <div @click.stop="selectedSectionIdx = -200" :class="{ selected: selectedSectionIdx === -200, dragfix: dragging }" class="item flex-between" style="padding: 0 8px 0 20px">
-                <div class="title">{{ sections.length + 1 }}. 底部导航栏</div>
+                <div class="title">{{ sections.length + 1 }}. 底部菜单</div>
                 <el-switch v-model="sectionFooter.enabled" size="small" />
               </div>
             </div>
@@ -178,6 +178,8 @@ function dragStart() {
   ElList.forEach((item) => {
     item.classList.add('nohover')
   })
+  // console.log(document.querySelector('.sortable-drag'))
+  // document.querySelector('.sortable-drag').style.height = document.querySelector('.section-ghost').offsetHeight + 'px'
 }
 
 function dragEnd() {
@@ -365,7 +367,6 @@ header {
 .main-wrap {
   background: #f3f3f3;
   display: flex;
-  // flex-direction: row;
   height: calc(100vh - 64px);
 }
 
@@ -396,6 +397,13 @@ aside {
       color: #fff;
     }
   }
+  .icon {
+    font-size: 40px;
+    height: 46px;
+    width: 40px;
+    padding: 0;
+    margin: 0;
+  }
   .nohover .item:hover {
     background-color: #fff;
     color: var(--color-text);
@@ -413,8 +421,9 @@ aside {
 }
 
 main {
-  position: relative;
+  // position: relative;
   min-width: 620px;
+  flex: 1;
   border-right: 1px solid #f1f1fa;
   background: #f0f0f2;
 }
@@ -422,7 +431,6 @@ main {
 .sections {
   position: relative;
   margin: 0 auto;
-
   width: 375px;
   min-height: 812px;
   background-color: #fff;
@@ -443,7 +451,7 @@ main {
   .flex-start {
     align-self: flex-start;
   }
-  .wrap {
+  .item {
     position: relative;
     user-select: none;
     background-color: #fff;
@@ -590,18 +598,23 @@ main {
     font-size: 14px;
   }
   .close {
-    height: 1.2em;
-    font-size: 1.2em;
+    height: 1em;
+    font-size: 1em;
     margin: 0;
     cursor: pointer;
   }
 
   .item {
     position: relative;
-    height: 40px;
+    display: flex;
     line-height: 40px;
     border: 1px solid #f1f1f1;
     background-color: #fff;
+
+    .title {
+      display: flex;
+      align-items: center;
+    }
 
     &:hover .handle {
       visibility: visible;
@@ -615,9 +628,11 @@ main {
   }
 
   .handle {
-    margin: 0 3px 0 3px;
+    margin: 0px 3px 0 3px;
     visibility: hidden;
     color: #999;
+    width: 1.2em;
+    height: 1.2em;
     &:hover {
       color: var(--color-main-highlight);
       cursor: move;
@@ -639,7 +654,6 @@ main {
 
 .nav-chosen .item {
   background-color: var(--color-main-highlight) !important;
-  border: 0 !important;
   color: #fff !important;
 }
 
