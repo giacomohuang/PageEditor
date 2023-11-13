@@ -4,7 +4,7 @@
 
 <script setup>
 import { inject, ref } from 'vue'
-const props = defineProps(['index'])
+// const props = defineProps(['index'])
 
-const section = inject('sections').value[props.index].data
+// const section = inject('sections').value[props.index].data
 </script>
