@@ -7,11 +7,12 @@
 </template>
 
 <script setup>
-// import { ref } from 'vue'
+import { ref, inject } from 'vue'
 
-// const props = defineProps(['data'])
-// const data = ref(props.data)
-// data.value.title = 'aaaaaa'
+const sectionFooter = inject('sectionFooter')
+const props = defineProps(['idx'])
+const data = sectionFooter.data
+console.log(data)
 </script>
 
 <style scoped lang="scss">

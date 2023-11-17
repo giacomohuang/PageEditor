@@ -54,7 +54,7 @@
                     <li @click.stop="moveBottomItem(index)" :class="{ disabled: index === sections.length - 1 }">
                       <el-icon><Download /></el-icon>
                     </li>
-                    <li @click.stop="copyItem(index)" :class="{ disabled: index === sections.length - 1 }">
+                    <li @click.stop="copyItem(index)">
                       <el-icon><CopyDocument /></el-icon>
                     </li>
                     <li @click.stop="deleteItem(index)">
@@ -67,7 +67,7 @@
           </draggable>
           <!--footer -->
           <div class="item footer" @click.stop="selectedSectionIdx = -20" :class="{ hide: !sectionFooter.enabled, active: selectedSectionIdx === -20, dragfix: dragging }">
-            <FooterNav />
+            <FooterNav></FooterNav>
           </div>
           <div class="size-mark ip8">iPhone 6/7/8 屏幕高度</div>
           <div class="size-mark ipx">iPhone X 屏幕高度</div>
@@ -120,7 +120,7 @@
     <aside class="props">
       <div class="title"></div>
 
-      <component :is="PropsComponent" :key="selectedSectionIdx" :index="selectedSectionIdx"></component>
+      <component :is="PropsComponent" :key="selectedSectionIdx"></component>
     </aside>
   </div>
 </template>
@@ -139,10 +139,14 @@ const sectionFooter = ref({ enabled: true, title: '底部' })
 const sectionHeader = ref({ title: '默认页面' })
 const dragging = ref(false)
 const scrollRef = ref(null)
-let navShow = true
-provide('sections', sections)
 const HeaderNav = defineAsyncComponent(() => import('../components/HeaderNav.vue'))
 const FooterNav = defineAsyncComponent(() => import('../components/FooterNav.vue'))
+let navShow = true
+
+provide('sections', sections)
+provide('selectedSectionIdx', selectedSectionIdx)
+provide('sectionHeader', sectionHeader)
+provide('sectionFooter', sectionFooter)
 
 const PropsComponent = computed(() => {
   const idx = selectedSectionIdx.value

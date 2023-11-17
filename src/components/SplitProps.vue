@@ -49,7 +49,7 @@
 </template>
 
 <script setup>
-import { ref, inject } from 'vue'
+import { inject } from 'vue'
 import utils from '../base/utils'
 import ColorPicker from '@mcistudio/vue-colorpicker'
 import '@mcistudio/vue-colorpicker/dist/style.css'
@@ -64,8 +64,8 @@ const typeEnum = utils.createEnum({
   gap: [2, '空白占位']
 })
 const sections = inject('sections')
-const props = defineProps(['index'])
-const data = sections.value[props.index].data
+const selectedSectionIdx = inject('selectedSectionIdx')
+const data = sections.value[selectedSectionIdx.value].data
 
 function colorChanged(obj) {
   data.color = obj.color
@@ -78,7 +78,7 @@ function colorChanged(obj) {
 </style>
 
 <style>
-.between > .el-form-item__content {
+.between .el-form-item__content {
   justify-content: space-between !important;
 }
 </style>
