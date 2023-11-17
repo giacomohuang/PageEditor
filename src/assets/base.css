@@ -9,7 +9,10 @@
 :root {
   --color-background: var(--vt-c-white);
   --color-text: var(--vt-c-text-light-1);
-  --color-main-highlight: #155bd4;
+  --color-main-highlight: #1250bd;
+  --color-split: #f1f1f1;
+  /* --color-main-highlight: rgb(0, 120, 212); */
+  /* --color-main-highlight: #2850ee; */
 }
 
 *,
@@ -24,10 +27,9 @@ body {
   min-height: 100vh;
   color: var(--color-text);
   background: var(--color-background);
-  transition:
+  /* transition:
     color 0.5s,
-    background-color 0.5s;
-  line-height: 1.6;
+    background-color 0.5s; */
   font-family:
     Inter,
     -apple-system,
@@ -62,8 +64,8 @@ li {
 .icon {
   fill: currentColor;
   overflow: hidden;
-  width: 1.2em;
-  height: 1.2em;
+  width: 1.4em;
+  height: 1.4em;
 }
 
 .relative {

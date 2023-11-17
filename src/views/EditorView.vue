@@ -3,6 +3,7 @@
     <div class="title">微页面编辑器</div>
     <div class="page-title">{{ sectionHeader.title }} {{ sectionFooter.title }}</div>
     <div class="oprs">
+      <el-button>预览</el-button>
       <el-button>保存</el-button>
       <el-button>退出</el-button>
     </div>
@@ -26,7 +27,7 @@
       <el-scrollbar :native="false" ref="scrollRef">
         <div class="sections">
           <!--header -->
-          <div class="item" @click.stop="selectedSectionIdx = -100" :class="{ active: selectedSectionIdx === -100, dragfix: dragging }">
+          <div class="item" @click.stop="selectedSectionIdx = -10" :class="{ active: selectedSectionIdx === -10, dragfix: dragging }">
             <HeaderNav></HeaderNav>
           </div>
           <div class="tips" v-if="!sections || sections.length == 0">请点击组件或将组件拖动到这里</div>
@@ -36,7 +37,7 @@
               <div>
                 <div class="relative">
                   <div class="item handle" :class="{ active: index === selectedSectionIdx, dragfix: dragging }" @mousedown.stop="editComponent($event, index)">
-                    <div style="height: 200px">
+                    <div>
                       <component :is="componentList[element.type]" :index="index" :key="element.id"></component>
                     </div>
                   </div>
@@ -65,9 +66,11 @@
             </template>
           </draggable>
           <!--footer -->
-          <div class="item footer" @click.stop="selectedSectionIdx = -200" :class="{ hide: !sectionFooter.enabled, active: selectedSectionIdx === -200, dragfix: dragging }">
-            <div>底部</div>
+          <div class="item footer" @click.stop="selectedSectionIdx = -20" :class="{ hide: !sectionFooter.enabled, active: selectedSectionIdx === -20, dragfix: dragging }">
+            <FooterNav />
           </div>
+          <div class="size-mark ip8">iPhone 6/7/8 屏幕高度</div>
+          <div class="size-mark ipx">iPhone X 屏幕高度</div>
         </div>
       </el-scrollbar>
       <div class="nav-btn" @click.stop="toggleNav">
@@ -84,15 +87,13 @@
         </div>
       </div>
       <el-scrollbar :native="false">
+        <div class="relative">
+          <div class="item" :class="{ selected: selectedSectionIdx === -10, dragfix: dragging }" @click.stop="selectedSectionIdx = -10">
+            <icon id="#-ico-disallow" class="disallow" />
+            <span>0. 头部标题栏</span>
+          </div>
+        </div>
         <draggable class="list" forceFallback="true" :options="{ direction: 'vertical' }" @start="dragStart" @end="dragEnd" :list="sections" item-key="id" handle=".handle" chosen-class="nav-chosen" @change="onSectionDropped">
-          <template #header>
-            <div class="relative">
-              <div class="item" :class="{ selected: selectedSectionIdx === -100, dragfix: dragging }" @click.stop="selectedSectionIdx = -100">
-                <icon id="#-ico-disallow" class="disallow" />
-                <span>0. 头部标题栏</span>
-              </div>
-            </div>
-          </template>
           <template #item="{ index, element }">
             <div class="relative">
               <div class="item" :class="{ selected: selectedSectionIdx === index, dragfix: dragging }" @click.stop="selectedSectionIdx = index">
@@ -104,33 +105,32 @@
               </div>
             </div>
           </template>
-          <template #footer>
-            <div class="relative">
-              <div class="item" :class="{ selected: selectedSectionIdx === -200, dragfix: dragging }" @click.stop="selectedSectionIdx = -200">
-                <icon id="#-ico-disallow" class="disallow" />
-                <span class="">{{ sections.length + 1 }}. 底部导航栏</span>
-                <el-switch class="switch" v-model="sectionFooter.enabled" size="small" />
-              </div>
-            </div>
-          </template>
         </draggable>
+        <div class="relative">
+          <div class="item" :class="{ selected: selectedSectionIdx === -20, dragfix: dragging }" @click.stop="selectedSectionIdx = -20">
+            <icon id="#-ico-disallow" class="disallow" />
+            <span class="">{{ sections.length + 1 }}. 底部导航栏</span>
+            <el-switch class="switch" v-model="sectionFooter.enabled" size="small" />
+          </div>
+        </div>
       </el-scrollbar>
     </aside>
 
     <!--属性 -->
     <aside class="props">
-      <component :is="PropsComponent" :key="selectedSectionIdx" :data="sectionFooter"></component>
+      <div class="title"></div>
+
+      <component :is="PropsComponent" :key="selectedSectionIdx" :index="selectedSectionIdx"></component>
     </aside>
   </div>
 </template>
 
 <script setup>
-import { provide, ref, computed, nextTick } from 'vue'
+import { provide, ref, computed, nextTick, defineAsyncComponent } from 'vue'
 import draggable from 'vuedraggable'
-import Utils from '../base/utils'
-import { Components } from '../components/Components'
-import Icon from '../components/Icon.vue'
-import { HeaderNav, FooterNav, Carousel, Image, RichText, Split, Text, CarouselProps, HeaderNavProps, FooterNavProps, ImageProps, RichTextProps, SplitProps, TextProps } from '../components/'
+import utils from '../base/utils'
+import { Components, propsList, componentList } from '../components/Components'
+// import * as C from '../components/'
 import { nanoid } from 'nanoid'
 
 const selectedSectionIdx = ref(-1)
@@ -141,39 +141,17 @@ const dragging = ref(false)
 const scrollRef = ref(null)
 let navShow = true
 provide('sections', sections)
-provide('selectedSectionIdx', selectedSectionIdx)
-
-const componentList = {
-  Carousel,
-  Image,
-  RichText,
-  Split,
-  Text,
-  HeaderNav,
-  FooterNav
-}
-const propsList = {
-  CarouselProps,
-  ImageProps,
-  RichTextProps,
-  SplitProps,
-  TextProps,
-  HeaderNavProps,
-  FooterNavProps
-}
-
-// const PropsComponents = {
-//   MultiChoiceProps,
-//   SingleChoiceProps
-// }
+const HeaderNav = defineAsyncComponent(() => import('../components/HeaderNav.vue'))
+const FooterNav = defineAsyncComponent(() => import('../components/FooterNav.vue'))
 
 const PropsComponent = computed(() => {
-  if (selectedSectionIdx.value === -100) {
-    return propsList['HeaderNavProps']
-  } else if (selectedSectionIdx.value === -200) {
-    return propsList['FooterNavProps']
+  const idx = selectedSectionIdx.value
+  if (idx === -10) {
+    return propsList.HeaderNavProps
+  } else if (idx === -20) {
+    return propsList.FooterNavProps
   } else {
-    return selectedSectionIdx.value >= 0 && sections.value ? propsList[sections.value[selectedSectionIdx.value].type + 'Props'] : null
+    return idx >= 0 && sections.value ? propsList[sections.value[idx].type + 'Props'] : null
   }
 })
 
@@ -197,7 +175,7 @@ function dragEnd() {
 
 function dropComponent(payload) {
   payload.id = nanoid()
-  return Utils.deepCopyJson(payload)
+  return utils.deepCopyJson(payload)
 }
 
 function onClickOutside(e) {
@@ -252,7 +230,7 @@ function swapItem(idx1, idx2) {
 }
 
 function copyItem(idx) {
-  const newItem = Utils.deepCopyJson(sections.value[idx])
+  const newItem = utils.deepCopyJson(sections.value[idx])
   newItem.id = nanoid()
   sections.value.splice(idx, 0, newItem)
   selectedSectionIdx.value++
@@ -329,7 +307,7 @@ header {
   min-width: 600px;
   height: 64px;
   font-size: 16px;
-  background: #43464f;
+  background: var(--color-main-highlight);
   color: #fff;
   justify-items: flex-start;
   /* border-bottom: 1px solid #e3e3e3; */
@@ -345,7 +323,7 @@ header {
     font-size: 16px;
     line-height: 16px;
     padding: 0 20px;
-    border-left: 1px solid #999;
+    border-left: 1px solid #aaa;
     color: #eee;
     flex: 1;
   }
@@ -412,7 +390,7 @@ aside {
 }
 
 main {
-  // position: relative;
+  position: relative;
   min-width: 620px;
   flex: 1;
   border-right: 1px solid #f1f1fa;
@@ -446,7 +424,7 @@ main {
     position: relative;
     user-select: none;
     background-color: #fff;
-
+    z-index: 102;
     &::before {
       content: '';
       position: absolute;
@@ -467,7 +445,8 @@ main {
     position: absolute;
     display: none;
     left: 375px;
-    top: -1px;
+    top: 0px;
+    z-index: 101;
     background: #fff;
     border: 1px solid #cccccc;
     border-radius: 0 4px 4px 0;
@@ -502,12 +481,12 @@ main {
 
   .active {
     &:hover::before {
-      z-index: 101;
+      z-index: 102;
       border: 2px solid var(--color-main-highlight);
     }
 
     &::before {
-      z-index: 101;
+      z-index: 102;
       border: 2px solid var(--color-main-highlight);
     }
   }
@@ -545,6 +524,22 @@ main {
 
   div {
     display: none;
+  }
+}
+
+.size-mark {
+  position: absolute;
+  color: #999;
+  border-top: 1px dashed #ccc;
+  padding: 2px 12px 12px;
+  left: 375px;
+  white-space: nowrap;
+  font-size: 12px;
+  &.ip8 {
+    top: 667px;
+  }
+  &.ipx {
+    top: 812px;
   }
 }
 
@@ -594,7 +589,7 @@ main {
     position: relative;
     display: flex;
     line-height: 40px;
-    border: 1px solid #f1f1f1;
+    border: 1px solid var(--color-split);
     background-color: #fff;
     align-items: center;
 
@@ -613,6 +608,7 @@ main {
   }
 
   .handle {
+    font-size: 14px;
     margin: 0px 3px 0 3px;
     visibility: hidden;
     color: #999;
@@ -623,6 +619,7 @@ main {
   }
 
   .disallow {
+    font-size: 14px;
     margin: 0px 3px 0 3px;
     visibility: hidden;
     color: #ccc;
