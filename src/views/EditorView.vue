@@ -24,13 +24,21 @@
       </el-scrollbar>
     </aside>
     <main @click="onClickOutside">
+      <div style="margin: 12px; position: absolute; z-index: 150">
+        <el-radio-group size="small">
+          <el-radio-button label="小程序" />
+          <el-radio-button label="H5" />
+          <el-radio-button disabled label="Android" />
+          <el-radio-button disabled label="iOS" />
+        </el-radio-group>
+      </div>
       <el-scrollbar :native="false" ref="scrollRef">
         <div class="sections">
           <!--header -->
-          <div class="item" @click.stop="selectedSectionIdx = -10" :class="{ active: selectedSectionIdx === -10, dragfix: dragging }">
+          <div class="item no-drag" @click.stop="selectedSectionIdx = -10" :class="{ active: selectedSectionIdx === -10, dragfix: dragging }">
             <HeaderNav></HeaderNav>
           </div>
-          <div class="tips" v-if="!sections || sections.length == 0">请点击组件或将组件拖动到这里</div>
+          <div class="tips" v-if="!sections || sections.length == 0">请将组件拖动到这里</div>
           <!--body -->
           <draggable forceFallback="true" handle=".handle" scrollSensitivity="200" @start="dragStart" @end="dragEnd" style="min-height: 750px" :list="sections" item-key="id" chosen-class="section-chosen" ghost-class="section-ghost" group="comp" @change="onSectionDropped">
             <template #item="{ element, index }">
@@ -66,7 +74,7 @@
             </template>
           </draggable>
           <!--footer -->
-          <div class="item footer" @click.stop="selectedSectionIdx = -20" :class="{ hide: !sectionFooter.enabled, active: selectedSectionIdx === -20, dragfix: dragging }">
+          <div class="item footer no-drag" @click.stop="selectedSectionIdx = -20" :class="{ hide: !sectionFooter.enabled, active: selectedSectionIdx === -20, dragfix: dragging }">
             <FooterNav></FooterNav>
           </div>
           <div class="size-mark ip8">iPhone 6/7/8 屏幕高度</div>
@@ -90,7 +98,7 @@
         <div class="relative">
           <div class="item" :class="{ selected: selectedSectionIdx === -10, dragfix: dragging }" @click.stop="selectedSectionIdx = -10">
             <icon id="#-ico-disallow" class="disallow" />
-            <span>0. 头部标题栏</span>
+            <span>0. 页面和标题栏</span>
           </div>
         </div>
         <draggable class="list" forceFallback="true" :options="{ direction: 'vertical' }" @start="dragStart" @end="dragEnd" :list="sections" item-key="id" handle=".handle" chosen-class="nav-chosen" @change="onSectionDropped">
@@ -109,7 +117,7 @@
         <div class="relative">
           <div class="item" :class="{ selected: selectedSectionIdx === -20, dragfix: dragging }" @click.stop="selectedSectionIdx = -20">
             <icon id="#-ico-disallow" class="disallow" />
-            <span class="">{{ sections.length + 1 }}. 底部导航栏</span>
+            <span class="">{{ sections.length + 1 }}. 固底导航</span>
             <el-switch class="switch" v-model="sectionFooter.enabled" size="small" />
           </div>
         </div>
@@ -117,10 +125,10 @@
     </aside>
 
     <!--属性 -->
-    <aside class="props">
-      <div class="title"></div>
-
-      <component :is="PropsComponent" :key="selectedSectionIdx"></component>
+    <aside class="props" :class="{ dragfix: dragging }">
+      <el-scrollbar :native="false">
+        <component :is="PropsComponent" :key="selectedSectionIdx"></component>
+      </el-scrollbar>
     </aside>
   </div>
 </template>
@@ -136,7 +144,7 @@ import { nanoid } from 'nanoid'
 const selectedSectionIdx = ref(-1)
 const sections = ref([])
 const sectionFooter = ref({ enabled: true, title: '底部' })
-const sectionHeader = ref({ title: '默认页面' })
+const sectionHeader = ref({ title: '默认页面', navStyle: '', backgroundColor: { color: { r: 225, g: 225, b: 225, a: 1 } } })
 const dragging = ref(false)
 const scrollRef = ref(null)
 const HeaderNav = defineAsyncComponent(() => import('../components/HeaderNav.vue'))
@@ -307,11 +315,14 @@ header {
   display: flex;
   position: relative;
   align-items: center;
-  // flex-wrap: nowrap;
-  min-width: 600px;
+  min-width: 1440px;
   height: 64px;
   font-size: 16px;
-  background: var(--color-main-highlight);
+  background-color: var(--color-main-highlight);
+  // background-image: radial-gradient(transparent 1px, var(--bg-color) 1px);
+  // background-size: 4px 4px;
+  // backdrop-filter: saturate(50%) blur(4px);
+  // -webkit-backdrop-filter: saturate(50%) blur(4px);
   color: #fff;
   justify-items: flex-start;
   /* border-bottom: 1px solid #e3e3e3; */
@@ -437,8 +448,10 @@ main {
       left: -2px;
       top: 0;
       box-sizing: border-box;
-      cursor: move;
       border: 0;
+    }
+    &:not(.no-drag)::before {
+      cursor: move;
     }
     &:hover::before {
       border: 2px dotted var(--color-main-highlight);
@@ -524,7 +537,7 @@ main {
   border-radius: 0;
   border: 0;
   list-style: none;
-  height: 200px;
+  height: 48px;
 
   div {
     display: none;

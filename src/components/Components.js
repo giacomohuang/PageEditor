@@ -27,7 +27,7 @@ export const Components = [
       paddingTB: 20,
       height: 40,
       size: 1,
-      color: { r: 225, g: 225, b: 225, a: 1 }
+      lineColor: { color: { r: 224, g: 224, b: 224, a: 1 } }
     }
   },
   {

@@ -9,10 +9,9 @@
 :root {
   --color-background: var(--vt-c-white);
   --color-text: var(--vt-c-text-light-1);
+  /* --color-main-highlight: #419eff; */
   --color-main-highlight: #1250bd;
   --color-split: #f1f1f1;
-  /* --color-main-highlight: rgb(0, 120, 212); */
-  /* --color-main-highlight: #2850ee; */
 }
 
 *,
@@ -91,4 +90,12 @@ li {
 
 .hide {
   display: none;
+}
+
+.pr12 {
+  padding-right: 12px;
+}
+
+.pl12 {
+  padding-left: 12px;
 }

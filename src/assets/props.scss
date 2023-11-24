@@ -14,16 +14,17 @@
 
 .icon {
   color: #ccc;
-  font-size: 16px;
+  font-size: 20px;
   
   &:hover {
     color: var(--color-main-highlight);
+    cursor:pointer;
   }
 }
 .body {
   padding: 20px 12px;
   .icon{
-    font-size:12px;
+    font-size:18px;
     color:var(--vt-c-text-light-1);
   }
   .is-active .icon{
@@ -33,5 +34,5 @@
 
 .val {
   font-weight:bold;
-  padding-right:12px;
+  color:var(--vt-c-text-light-1);
 }
