@@ -12,14 +12,13 @@ export default defineConfig({
     }
   },
   // transpileDependencies: true,
-  devServer: {
+  server: {
     proxy: {
-      '^/api': {
-        target: 'https://sm.ms/api/v2/',
-        ws: true,
+      '/api': {
+        target: 'https://smms.app/api/v2/',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
-        // secure: false
+        // // secure: false
         // Headers: {
         //   'Referer': 'https://smms.app'
         // }

@@ -23,15 +23,15 @@
       </el-form-item>
 
       <el-form-item label="左右间距" v-show="data.type === 'line'">
-        <el-slider v-model="data.paddingLR" size="small" :min="0" :max="40" style="width: 200px" />
+        <el-slider v-model="data.paddingLR" size="small" :min="0" :max="40" style="width: 190px" />
         <div class="val pl12">{{ data.paddingLR }}px</div>
       </el-form-item>
       <el-form-item label="上下间距" v-show="data.type === 'line'">
-        <el-slider v-model="data.paddingTB" size="small" :min="0" :max="200" style="width: 200px" />
+        <el-slider v-model="data.paddingTB" size="small" :min="0" :max="200" style="width: 190px" />
         <div class="val pl12">{{ data.paddingTB }}px</div>
       </el-form-item>
       <el-form-item label="线宽" v-show="data.type === 'line'">
-        <el-slider v-model="data.size" size="small" :min="1" :max="10" style="width: 200px" />
+        <el-slider v-model="data.size" size="small" :min="1" :max="10" style="width: 190px" />
         <div class="val pl12">{{ data.size }}px</div>
       </el-form-item>
       <el-form-item label="颜色" v-show="data.type === 'line'">
@@ -39,7 +39,7 @@
         <div class="val pl12">{{ data.lineColor.hex }}</div>
       </el-form-item>
       <el-form-item label="高度" v-show="data.type === 'gap'">
-        <el-slider v-model="data.height" size="small" :min="0" :max="200" style="width: 200px" />
+        <el-slider v-model="data.height" size="small" :min="0" :max="200" style="width: 190px" />
         <div class="val pl12">{{ data.height }}px</div>
       </el-form-item>
       <!-- <el-divider /> -->

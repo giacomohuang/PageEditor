@@ -1,7 +1,7 @@
 <template>
   <header :class="{ dragfix: dragging }">
     <div class="title">微页面编辑器</div>
-    <div class="page-title">{{ sectionHeader.title }} {{ sectionFooter.title }}</div>
+    <div class="page-title">{{ sectionHeader.title }}</div>
     <div class="oprs">
       <el-button>预览</el-button>
       <el-button>保存</el-button>
@@ -40,7 +40,7 @@
           </div>
           <div class="tips" v-if="!sections || sections.length == 0">请将组件拖动到这里</div>
           <!--body -->
-          <draggable forceFallback="true" handle=".handle" scrollSensitivity="200" @start="dragStart" @end="dragEnd" style="min-height: 750px" :list="sections" item-key="id" chosen-class="section-chosen" ghost-class="section-ghost" group="comp" @change="onSectionDropped">
+          <draggable forceFallback="true" handle=".handle" scrollSensitivity="200" @start="dragStart" @end="dragEnd" class="body" :list="sections" item-key="id" chosen-class="section-chosen" ghost-class="section-ghost" group="comp" @change="onSectionDropped">
             <template #item="{ element, index }">
               <div>
                 <div class="relative">
@@ -101,7 +101,7 @@
             <span>0. 页面和标题栏</span>
           </div>
         </div>
-        <draggable class="list" forceFallback="true" :options="{ direction: 'vertical' }" @start="dragStart" @end="dragEnd" :list="sections" item-key="id" handle=".handle" chosen-class="nav-chosen" @change="onSectionDropped">
+        <draggable class="list" :list="sections" item-key="id" handle=".handle" chosen-class="nav-chosen" ghost-class="nav-ghost" @change="onSectionDropped">
           <template #item="{ index, element }">
             <div class="relative">
               <div class="item" :class="{ selected: selectedSectionIdx === index, dragfix: dragging }" @click.stop="selectedSectionIdx = index">
@@ -118,7 +118,7 @@
           <div class="item" :class="{ selected: selectedSectionIdx === -20, dragfix: dragging }" @click.stop="selectedSectionIdx = -20">
             <icon id="#-ico-disallow" class="disallow" />
             <span class="">{{ sections.length + 1 }}. 固底导航</span>
-            <el-switch class="switch" v-model="sectionFooter.enabled" size="small" />
+            <el-switch class="switch" v-model="sectionFooter.enabled" @change="toggleFooter" size="small" />
           </div>
         </div>
       </el-scrollbar>
@@ -143,7 +143,17 @@ import { nanoid } from 'nanoid'
 
 const selectedSectionIdx = ref(-1)
 const sections = ref([])
-const sectionFooter = ref({ enabled: true, title: '底部' })
+const sectionFooter = ref({
+  enabled: true,
+  style: 'normal',
+  btns: [
+    { title: '首页', ico: '', link: '' },
+    { title: '停车', ico: '', link: '' },
+    { title: '发现', ico: '', link: '' },
+    { title: '优惠', ico: '', link: '' },
+    { title: '我的', ico: '', link: '' }
+  ]
+})
 const sectionHeader = ref({ title: '默认页面', navStyle: '', backgroundColor: { color: { r: 225, g: 225, b: 225, a: 1 } } })
 const dragging = ref(false)
 const scrollRef = ref(null)
@@ -151,13 +161,14 @@ const HeaderNav = defineAsyncComponent(() => import('../components/HeaderNav.vue
 const FooterNav = defineAsyncComponent(() => import('../components/FooterNav.vue'))
 let navShow = true
 
-provide('sections', sections)
 provide('selectedSectionIdx', selectedSectionIdx)
+provide('sections', sections)
 provide('sectionHeader', sectionHeader)
 provide('sectionFooter', sectionFooter)
 
 const PropsComponent = computed(() => {
   const idx = selectedSectionIdx.value
+  console.log(idx)
   if (idx === -10) {
     return propsList.HeaderNavProps
   } else if (idx === -20) {
@@ -166,6 +177,17 @@ const PropsComponent = computed(() => {
     return idx >= 0 && sections.value ? propsList[sections.value[idx].type + 'Props'] : null
   }
 })
+toggleFooter()
+// document.documentElement.setAttribute('theme', 'dark')
+
+function toggleFooter() {
+  let root = document.documentElement
+  if (sectionFooter.value.enabled) {
+    root.style.setProperty('--section-minheight', '639px')
+  } else {
+    root.style.setProperty('--section-minheight', '722px')
+  }
+}
 
 function dragStart() {
   dragging.value = true
@@ -200,9 +222,16 @@ function onClickOutside(e) {
 
 function onSectionDropped(e) {
   if (e.moved) {
-    selectedSectionIdx.value = e.moved.newIndex
+    // Fix the out-of-range index bug in vuedraggable when dynamically loading components
+    if (e.moved.newIndex > sections.value.length - 1) {
+      selectedSectionIdx.value = sections.value.length - 1
+    } else {
+      selectedSectionIdx.value = e.moved.newIndex
+    }
+    console.log('moved', selectedSectionIdx.value)
   } else if (e.added) {
     selectedSectionIdx.value = e.added.newIndex
+    console.log('new', selectedSectionIdx.value)
   }
 }
 
@@ -307,6 +336,10 @@ function toggleNav() {
 </script>
 
 <style lang="scss">
+:root {
+  --section-minheight: 722px;
+}
+
 .dragfix {
   pointer-events: none;
 }
@@ -416,12 +449,13 @@ main {
   position: relative;
   margin: 0 auto;
   width: 375px;
-  min-height: 812px;
-  background-color: #fff;
   margin: 40px auto 100px auto;
   user-select: none;
+  -webkit-user-select: none;
   box-shadow: 0px 0px 8px 4px rgba(0, 0, 0, 0.05);
-
+  .body {
+    min-height: var(--section-minheight);
+  }
   .tips {
     position: absolute;
     top: 90px;
@@ -438,7 +472,8 @@ main {
   .item {
     position: relative;
     user-select: none;
-    background-color: #fff;
+    -webkit-user-select: none;
+    // background-color: #fff;
     z-index: 102;
     &::before {
       content: '';
@@ -449,6 +484,7 @@ main {
       top: 0;
       box-sizing: border-box;
       border: 0;
+      z-index: 1;
     }
     &:not(.no-drag)::before {
       cursor: move;
@@ -498,12 +534,12 @@ main {
 
   .active {
     &:hover::before {
-      z-index: 102;
+      z-index: 1;
       border: 2px solid var(--color-main-highlight);
     }
 
     &::before {
-      z-index: 102;
+      z-index: 1;
       border: 2px solid var(--color-main-highlight);
     }
   }
@@ -525,14 +561,17 @@ main {
   }
 }
 
-.section-ghost {
+.strip {
   background-size: 8px 8px; /* 控制条纹的大小 */
   background-color: rgb(147, 202, 236);
   background-image: -webkit-gradient(linear, 0 0, 100% 100%, color-stop(0.25, rgba(255, 255, 255, 0.2)), color-stop(0.25, transparent), color-stop(0.5, transparent), color-stop(0.5, rgba(255, 255, 255, 0.2)), color-stop(0.75, rgba(255, 255, 255, 0.2)), color-stop(0.75, transparent), to(transparent));
   background-image: -moz-linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);
   background-image: -o-linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);
   background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);
+}
 
+.section-ghost {
+  @extend .strip;
   box-shadow: none;
   border-radius: 0;
   border: 0;
@@ -579,6 +618,7 @@ main {
 
 .navs {
   user-select: none;
+  -webkit-user-select: none;
   width: 180px;
   min-width: 180px;
   display: flex;
@@ -668,6 +708,13 @@ main {
   background-color: var(--color-main-highlight) !important;
   border: 1px solid var(--color-main-highlight);
   color: #fff !important;
+}
+
+.nav-ghost {
+  @extend .strip;
+  * {
+    visibility: hidden;
+  }
 }
 
 .props {

@@ -1,0 +1,11 @@
+:root {
+  --t-brand-color: #606060;
+  /* --theme-default-page */
+  --t-nav-bg-color: #fff;
+}
+
+[theme='dark'] {
+  --t-brand-color: #ffffff;
+  /* --theme-default-page */
+  --t-nav-bg-color: #454545;
+}

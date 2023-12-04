@@ -5,6 +5,7 @@
   </div>
   <div class="body">
     <el-form :model="data" label-width="100px">
+      <div class="title">页面布局</div>
       <el-form-item label="页面标题" class="between">
         <el-input v-model="data.title" placeholder="请填写页面名称，不超过8个汉字" />
       </el-form-item>
@@ -13,8 +14,8 @@
         <div class="val pl12">{{ data.backgroundColor.hex }}</div>
       </el-form-item>
       <el-form-item label="背景图片">
-        <el-upload class="avatar-uploader" action="#" :http-request="upload" :show-file-list="false" :on-success="handleAvatarSuccess">
-          <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+        <el-upload class="avatar-uploader" action="#" :http-request="upload" :show-file-list="false">
+          <img v-if="data.backgroundImageUrl" :src="data.backgroundImageUrl" style="width: 178px" class="avatar" />
           <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
         </el-upload>
       </el-form-item>
@@ -22,9 +23,7 @@
         <el-switch v-model="data.monoStyle" />
       </el-form-item>
       <el-divider />
-      <el-form-item label="标题栏">
-        <el-switch v-model="data.navbar" />
-      </el-form-item>
+      <div class="title" style="display: flex; align-items: center"><span style="padding-right: 12px">标题栏</span><el-switch v-model="data.navbar" /></div>
       <el-form-item label="标题栏风格">
         <el-radio-group v-model="data.navStyle">
           <el-radio-button label="fixed">固顶</el-radio-button>
@@ -67,7 +66,9 @@ import '@mcistudio/vue-colorpicker/dist/style.css'
 //   line: [1, '分割线'],
 //   gap: [2, '空白占位']
 // })
-const data = inject('sectionHeader')
+const section = inject('sectionHeader')
+const data = section.value
+console.log(data)
 // const selectedSectionIdx = inject('selectedSectionIdx')
 // const data = sectionHeader
 
@@ -83,6 +84,12 @@ function upload(file) {
     })
     .then((res) => {
       console.log(res)
+      if (res.data.code === 'image_repeated') {
+        data.backgroundImageUrl = res.data.images
+      } else {
+        data.backgroundImageUrl = res.data.data.url
+      }
+      console.log(data.backgroundImageUrl)
     })
 }
 </script>

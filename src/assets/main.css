@@ -1,4 +1,5 @@
 @import './base.css';
+@import './theme.css';
 #app {
   margin: 0;
   padding: 0;
