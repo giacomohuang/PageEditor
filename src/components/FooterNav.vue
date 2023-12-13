@@ -1,36 +1,23 @@
 <template>
   <div class="footer-wrap" :class="data.style">
     <ul class="tabs">
-      <li>
-        <div class="wrap">
-          <div class="ico"><icon id="#-ico-image" /></div>
-          <div class="text">嘎嘎嘎嘎嘎</div>
-        </div>
-      </li>
-      <li>
-        <div class="wrap">
-          <div class="ico"><icon id="#-ico-text" /></div>
-          <div class="text">嘎嘎嘎嘎</div>
-        </div>
-      </li>
-      <li>
-        <div class="wrap center">
-          <div class="ico"><icon id="#-ico-text" /></div>
-          <div class="text">嘎嘎嘎嘎</div>
-        </div>
-      </li>
-      <li>
-        <div class="wrap">
-          <div class="ico"><icon id="#-ico-carousel" /></div>
-          <div class="text">嘎嘎嘎嘎</div>
-        </div>
-      </li>
-      <li>
-        <div class="wrap">
-          <div class="ico"><icon id="#-ico-richtext" /></div>
-          <div class="text">嘎嘎嘎嘎</div>
-        </div>
-      </li>
+      <template v-for="(item, index) in data.btns" :key="index">
+        <li v-if="index < data.btnNum">
+          <div class="wrap" :class="{ center: (data.style !== 'normal' && data.btnNum === 5 && index === 2) || (data.btnNum === 3 && index === 1) }">
+            <div class="ico">
+              <img
+                :src="item.imgUrl || defaultImage"
+                @error="
+                  (e) => {
+                    e.target.src = defaultImage
+                  }
+                "
+              />
+            </div>
+            <div class="text">{{ item.title }}</div>
+          </div>
+        </li>
+      </template>
     </ul>
     <div class="indicator"></div>
   </div>
@@ -38,6 +25,7 @@
 
 <script setup>
 import { inject, ref } from 'vue'
+import defaultImage from '@/assets/img/defaultimage.png'
 const data = inject('sectionFooter')
 </script>
 
@@ -67,11 +55,21 @@ const data = inject('sectionFooter')
     border-radius: 50%;
     z-index: 1;
     border-top: var(--border-line);
-    // box-shadow: -0px -1px 0 #ccc;
+    .ico {
+      width: 48px;
+      height: 48px;
+      border-radius: 48px;
+    }
+    img {
+      border-radius: 48px;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
     .text {
       position: absolute;
-      bottom: -13px;
+      bottom: -7px;
       margin-top: 15px;
     }
   }
@@ -81,6 +79,7 @@ const data = inject('sectionFooter')
   .tabs {
     border: 0;
   }
+
   &::before {
     content: '';
     display: inline;
@@ -119,15 +118,16 @@ const data = inject('sectionFooter')
       position: absolute;
       top: -30px;
       z-index: 2;
-      background: #dc3232;
+      // background: #dc3232;
       width: 65px;
       height: 65px;
       border-radius: 50%;
     }
-    .icon {
-      height: 40px;
-      width: 40px;
-      color: #fff;
+    img {
+      border-radius: 65px;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
     .text {
       display: none;
@@ -156,22 +156,27 @@ const data = inject('sectionFooter')
     justify-content: center;
     align-items: center;
   }
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+
+    z-index: 1;
+  }
 
   .ico {
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-
-  .icon {
-    z-index: 2;
-    height: 32px;
-    width: 32px;
+    width: 24px;
+    height: 24px;
   }
 
   .text {
     z-index: 2;
     font-size: 12px;
+    line-height: 100%;
+    padding-top: 3px;
     color: #000;
   }
 }

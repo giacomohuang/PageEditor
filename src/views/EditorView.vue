@@ -24,7 +24,7 @@
       </el-scrollbar>
     </aside>
     <main @click="onClickOutside">
-      <div style="margin: 12px; position: absolute; z-index: 150">
+      <div style="margin: 8px 12px; position: absolute; z-index: 150">
         <el-radio-group size="small">
           <el-radio-button label="小程序" />
           <el-radio-button label="H5" />
@@ -33,10 +33,12 @@
         </el-radio-group>
       </div>
       <el-scrollbar :native="false" ref="scrollRef">
-        <div class="sections">
+        <div class="sections" :style="{ 'background-color': utils.rgba2hex(sectionHeader.bgColor.color) }">
           <!--header -->
           <div class="item no-drag" @click.stop="selectedSectionIdx = -10" :class="{ active: selectedSectionIdx === -10, dragfix: dragging }">
-            <HeaderNav></HeaderNav>
+            <div :class="{ grayscale: sectionHeader.grayscale }">
+              <HeaderNav></HeaderNav>
+            </div>
           </div>
           <div class="tips" v-if="!sections || sections.length == 0">请将组件拖动到这里</div>
           <!--body -->
@@ -45,7 +47,7 @@
               <div>
                 <div class="relative">
                   <div class="item handle" :class="{ active: index === selectedSectionIdx, dragfix: dragging }" @mousedown.stop="editComponent($event, index)">
-                    <div>
+                    <div :class="{ grayscale: sectionHeader.grayscale }">
                       <component :is="componentList[element.type]" :index="index" :key="element.id"></component>
                     </div>
                   </div>
@@ -75,7 +77,9 @@
           </draggable>
           <!--footer -->
           <div class="item footer no-drag" @click.stop="selectedSectionIdx = -20" :class="{ hide: !sectionFooter.enabled, active: selectedSectionIdx === -20, dragfix: dragging }">
-            <FooterNav></FooterNav>
+            <div :class="{ grayscale: sectionHeader.grayscale }">
+              <FooterNav></FooterNav>
+            </div>
           </div>
           <div class="size-mark ip8">iPhone 6/7/8 屏幕高度</div>
           <div class="size-mark ipx">iPhone X 屏幕高度</div>
@@ -143,18 +147,28 @@ import { nanoid } from 'nanoid'
 
 const selectedSectionIdx = ref(-1)
 const sections = ref([])
+const sectionHeader = ref({
+  title: '默认页面',
+  bgColor: { color: { r: 235, g: 235, b: 235, a: 1 } },
+  grayscale: false,
+  navStyle: '',
+
+  navBgColor: { color: { r: 255, g: 255, b: 255, a: 1 } }
+})
+
 const sectionFooter = ref({
   enabled: true,
   style: 'normal',
+  btnNum: 5,
   btns: [
-    { title: '首页', ico: '', link: '' },
-    { title: '停车', ico: '', link: '' },
-    { title: '发现', ico: '', link: '' },
-    { title: '优惠', ico: '', link: '' },
-    { title: '我的', ico: '', link: '' }
+    { title: '首页', imgUrl: '', link: '' },
+    { title: '停车', imgUrl: '', link: '' },
+    { title: '发现', imgUrl: '', link: '' },
+    { title: '优惠', imgUrl: '', link: '' },
+    { title: '我的', imgUrl: '', link: '' }
   ]
 })
-const sectionHeader = ref({ title: '默认页面', navStyle: '', backgroundColor: { color: { r: 225, g: 225, b: 225, a: 1 } } })
+
 const dragging = ref(false)
 const scrollRef = ref(null)
 const HeaderNav = defineAsyncComponent(() => import('../components/HeaderNav.vue'))
@@ -168,7 +182,6 @@ provide('sectionFooter', sectionFooter)
 
 const PropsComponent = computed(() => {
   const idx = selectedSectionIdx.value
-  console.log(idx)
   if (idx === -10) {
     return propsList.HeaderNavProps
   } else if (idx === -20) {
@@ -228,10 +241,8 @@ function onSectionDropped(e) {
     } else {
       selectedSectionIdx.value = e.moved.newIndex
     }
-    console.log('moved', selectedSectionIdx.value)
   } else if (e.added) {
     selectedSectionIdx.value = e.added.newIndex
-    console.log('new', selectedSectionIdx.value)
   }
 }
 
@@ -275,7 +286,6 @@ function copyItem(idx) {
   newItem.id = nanoid()
   sections.value.splice(idx, 0, newItem)
   selectedSectionIdx.value++
-  console.log(sections.value)
   nextTick(() => {
     fixPos()
   })
@@ -309,7 +319,6 @@ function fixPos() {
 }
 
 function toggleNav() {
-  console.log('toggle')
   if (navShow) {
     document.querySelector('.navs').style.display = 'none'
     document.querySelector('.nav-btn').style.display = 'block'
@@ -335,13 +344,26 @@ function toggleNav() {
 */
 </script>
 
-<style lang="scss">
+<style>
+@import '../assets/theme.scss';
+</style>
+
+<style lang="scss" scoped>
 :root {
   --section-minheight: 722px;
 }
 
 .dragfix {
   pointer-events: none;
+}
+
+.strip {
+  background-size: 8px 8px; /* 控制条纹的大小 */
+  background-color: rgb(147, 202, 236);
+  background-image: -webkit-gradient(linear, 0 0, 100% 100%, color-stop(0.25, rgba(255, 255, 255, 0.2)), color-stop(0.25, transparent), color-stop(0.5, transparent), color-stop(0.5, rgba(255, 255, 255, 0.2)), color-stop(0.75, rgba(255, 255, 255, 0.2)), color-stop(0.75, transparent), to(transparent));
+  background-image: -moz-linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);
+  background-image: -o-linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);
+  background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);
 }
 
 header {
@@ -352,15 +374,10 @@ header {
   height: 64px;
   font-size: 16px;
   background-color: var(--color-main-highlight);
-  // background-image: radial-gradient(transparent 1px, var(--bg-color) 1px);
-  // background-size: 4px 4px;
-  // backdrop-filter: saturate(50%) blur(4px);
-  // -webkit-backdrop-filter: saturate(50%) blur(4px);
   color: #fff;
   justify-items: flex-start;
-  /* border-bottom: 1px solid #e3e3e3; */
   z-index: 101;
-  /* box-shadow: 0px 4px 4px 0px rgba(210, 210, 210, 0.3); */
+
   .title {
     margin: 0 20px;
     font-size: 22px;
@@ -445,11 +462,15 @@ main {
   background: #f0f0f2;
 }
 
+.grayscale {
+  filter: grayscale(1);
+}
+
 .sections {
   position: relative;
   margin: 0 auto;
   width: 375px;
-  margin: 40px auto 100px auto;
+  margin: 50px auto 100px auto;
   user-select: none;
   -webkit-user-select: none;
   box-shadow: 0px 0px 8px 4px rgba(0, 0, 0, 0.05);
@@ -473,7 +494,6 @@ main {
     position: relative;
     user-select: none;
     -webkit-user-select: none;
-    // background-color: #fff;
     z-index: 102;
     &::before {
       content: '';
@@ -504,7 +524,6 @@ main {
     border: 1px solid #cccccc;
     border-radius: 0 4px 4px 0;
     box-shadow: 0px 0px 4px 4px rgba(0, 0, 0, 0.05);
-    // z-index: 100;
     li {
       position: relative;
       display: flex;
@@ -559,15 +578,6 @@ main {
   .oprs {
     display: none;
   }
-}
-
-.strip {
-  background-size: 8px 8px; /* 控制条纹的大小 */
-  background-color: rgb(147, 202, 236);
-  background-image: -webkit-gradient(linear, 0 0, 100% 100%, color-stop(0.25, rgba(255, 255, 255, 0.2)), color-stop(0.25, transparent), color-stop(0.5, transparent), color-stop(0.5, rgba(255, 255, 255, 0.2)), color-stop(0.75, rgba(255, 255, 255, 0.2)), color-stop(0.75, transparent), to(transparent));
-  background-image: -moz-linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);
-  background-image: -o-linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);
-  background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);
 }
 
 .section-ghost {

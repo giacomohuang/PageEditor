@@ -5,22 +5,22 @@
   </div>
   <div class="body">
     <el-form :model="data" label-width="100px">
-      <div class="title">页面布局</div>
+      <div class="title">页面</div>
       <el-form-item label="页面标题" class="between">
         <el-input v-model="data.title" placeholder="请填写页面名称，不超过8个汉字" />
       </el-form-item>
-      <el-form-item label="背景颜色">
-        <ColorPicker v-model="data.backgroundColor" size="medium" modebar="none"></ColorPicker>
-        <div class="val pl12">{{ data.backgroundColor.hex }}</div>
+      <el-form-item label="背景色">
+        <ColorPicker v-model="data.bgColor" size="medium" modebar="none"></ColorPicker>
+        <div class="val pl12">{{ data.bgColor.hex }}</div>
       </el-form-item>
-      <el-form-item label="背景图片">
+      <!-- <el-form-item label="背景图片">
         <el-upload class="avatar-uploader" action="#" :http-request="upload" :show-file-list="false">
           <img v-if="data.backgroundImageUrl" :src="data.backgroundImageUrl" style="width: 178px" class="avatar" />
           <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
         </el-upload>
-      </el-form-item>
-      <el-form-item label="黑白主题">
-        <el-switch v-model="data.monoStyle" />
+      </el-form-item> -->
+      <el-form-item label="灰白模式">
+        <el-switch v-model="data.grayscale" />
       </el-form-item>
       <el-divider />
       <div class="title" style="display: flex; align-items: center"><span style="padding-right: 12px">标题栏</span><el-switch v-model="data.navbar" /></div>
@@ -30,6 +30,10 @@
           <el-radio-button label="scroll">滚动</el-radio-button>
           <el-radio-button label="custom">沉浸式</el-radio-button>
         </el-radio-group>
+      </el-form-item>
+      <el-form-item label="背景色">
+        <ColorPicker v-model="data.navBgColor" size="medium" modebar="none"></ColorPicker>
+        <div class="val pl12">{{ data.navBgColor.hex }}</div>
       </el-form-item>
       <el-form-item label="标题">
         <el-radio-group v-model="data.titleType" style="">
@@ -71,52 +75,7 @@ const data = section.value
 console.log(data)
 // const selectedSectionIdx = inject('selectedSectionIdx')
 // const data = sectionHeader
-
-function upload(file) {
-  const formData = new FormData()
-  formData.append('smfile', file.file)
-  axios
-    .post('api/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: 'qgfMlDz62BpgaH4qcxn7YLvxqQ0YYTSp'
-      }
-    })
-    .then((res) => {
-      console.log(res)
-      if (res.data.code === 'image_repeated') {
-        data.backgroundImageUrl = res.data.images
-      } else {
-        data.backgroundImageUrl = res.data.data.url
-      }
-      console.log(data.backgroundImageUrl)
-    })
-}
 </script>
-
 <style scoped lang="scss">
 @import url('../assets/props.scss');
-</style>
-
-<style>
-.avatar-uploader .el-upload {
-  border: 1px dashed var(--el-border-color);
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: var(--el-transition-duration-fast);
-}
-
-.avatar-uploader .el-upload:hover {
-  border-color: var(--el-color-primary);
-}
-
-.el-icon.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 178px;
-  height: 178px;
-  text-align: center;
-}
 </style>

@@ -35,6 +35,16 @@ const utils = {
     let [r, g, b, a = 255] = hex.match(/\w\w/g).map((v) => parseInt(v, 16))
     a = a / 255
     return { r: r, g: g, b: b, a: a.toFixed(1) }
+  },
+  setStyle(item, value) {
+    let root = document.documentElement
+    root.style.setProperty(item, value)
+  },
+  getTime() {
+    const now = new Date()
+    const hour = ('0' + now.getHours()).slice(-2)
+    const min = ('0' + now.getMinutes()).slice(-2)
+    return `${hour}:${min}`
   }
 }
 
