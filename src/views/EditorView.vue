@@ -33,23 +33,19 @@
         </el-radio-group>
       </div>
       <el-scrollbar :native="false" ref="scrollRef">
-        <div class="sections" :style="{ 'background-color': utils.rgba2hex(sectionHeader.bgColor.color) }">
+        <div class="sections" :class="{ grayscale: sectionHeader.grayscale === 'all' }" :style="{ 'background-color': utils.rgba2hex(sectionHeader.bgColor.color) }">
           <!--header -->
           <div class="item no-drag" @click.stop="selectedSectionIdx = -10" :class="{ active: selectedSectionIdx === -10, dragfix: dragging }">
-            <div :class="{ grayscale: sectionHeader.grayscale }">
-              <HeaderNav></HeaderNav>
-            </div>
+            <HeaderNav></HeaderNav>
           </div>
           <div class="tips" v-if="!sections || sections.length == 0">请将组件拖动到这里</div>
           <!--body -->
           <draggable forceFallback="true" handle=".handle" scrollSensitivity="200" @start="dragStart" @end="dragEnd" class="body" :list="sections" item-key="id" chosen-class="section-chosen" ghost-class="section-ghost" group="comp" @change="onSectionDropped">
             <template #item="{ element, index }">
-              <div>
+              <div class="lh0">
                 <div class="relative">
                   <div class="item handle" :class="{ active: index === selectedSectionIdx, dragfix: dragging }" @mousedown.stop="editComponent($event, index)">
-                    <div :class="{ grayscale: sectionHeader.grayscale }">
-                      <component :is="componentList[element.type]" :index="index" :key="element.id"></component>
-                    </div>
+                    <component :is="componentList[element.type]" :index="index" :key="element.id"></component>
                   </div>
                   <ul class="oprs" :class="{ show: index === selectedSectionIdx }">
                     <li @click.stop="moveUpItem(index)" :class="{ disabled: index === 0 }">
@@ -77,9 +73,7 @@
           </draggable>
           <!--footer -->
           <div class="item footer no-drag" @click.stop="selectedSectionIdx = -20" :class="{ hide: !sectionFooter.enabled, active: selectedSectionIdx === -20, dragfix: dragging }">
-            <div :class="{ grayscale: sectionHeader.grayscale }">
-              <FooterNav></FooterNav>
-            </div>
+            <FooterNav></FooterNav>
           </div>
           <div class="size-mark ip8">iPhone 6/7/8 屏幕高度</div>
           <div class="size-mark ipx">iPhone X 屏幕高度</div>
@@ -138,11 +132,10 @@
 </template>
 
 <script setup>
-import { provide, ref, computed, nextTick, defineAsyncComponent } from 'vue'
+import { provide, ref, computed, nextTick, defineAsyncComponent, watch } from 'vue'
 import draggable from 'vuedraggable'
 import utils from '../base/utils'
 import { Components, propsList, componentList } from '../components/Components'
-// import * as C from '../components/'
 import { nanoid } from 'nanoid'
 
 const selectedSectionIdx = ref(-1)
@@ -150,9 +143,8 @@ const sections = ref([])
 const sectionHeader = ref({
   title: '默认页面',
   bgColor: { color: { r: 235, g: 235, b: 235, a: 1 } },
-  grayscale: false,
+  grayscale: 'off',
   navStyle: '',
-
   navBgColor: { color: { r: 255, g: 255, b: 255, a: 1 } }
 })
 
@@ -162,9 +154,9 @@ const sectionFooter = ref({
   btnNum: 5,
   btns: [
     { title: '首页', imgUrl: '', link: '' },
+    { title: '商户', imgUrl: '', link: '' },
+    { title: '活动', imgUrl: '', link: '' },
     { title: '停车', imgUrl: '', link: '' },
-    { title: '发现', imgUrl: '', link: '' },
-    { title: '优惠', imgUrl: '', link: '' },
     { title: '我的', imgUrl: '', link: '' }
   ]
 })
@@ -174,11 +166,24 @@ const scrollRef = ref(null)
 const HeaderNav = defineAsyncComponent(() => import('../components/HeaderNav.vue'))
 const FooterNav = defineAsyncComponent(() => import('../components/FooterNav.vue'))
 let navShow = true
+let sectionsChanged = false
 
 provide('selectedSectionIdx', selectedSectionIdx)
 provide('sections', sections)
 provide('sectionHeader', sectionHeader)
 provide('sectionFooter', sectionFooter)
+
+// 监听内容变更
+const changedWatcher = watch(
+  sections,
+  () => {
+    console.log('changed')
+    sectionsChanged = true
+    // 停止监听
+    changedWatcher()
+  },
+  { deep: true }
+)
 
 const PropsComponent = computed(() => {
   const idx = selectedSectionIdx.value
@@ -204,7 +209,7 @@ function toggleFooter() {
 
 function dragStart() {
   dragging.value = true
-  // fix hover css when dragging
+  // fix hover css problem when dragging
   let ElList = document.querySelectorAll('.components>div:not(.component-drag)')
   ElList.forEach((item) => {
     item.classList.add('nohover')
@@ -213,7 +218,7 @@ function dragStart() {
 
 function dragEnd() {
   dragging.value = false
-  // fix hover css when dragging
+  // fix hover css problem when dragging
   let ElList = document.querySelectorAll('.components>div:not(.component-drag)')
   ElList.forEach((item) => {
     item.classList.remove('nohover')
@@ -357,6 +362,20 @@ function toggleNav() {
   pointer-events: none;
 }
 
+// .grayscale::before {
+//   content: '';
+//   position: absolute;
+//   inset: 0;
+//   backdrop-filter: grayscale(95%);
+//   z-index: 1000;
+//   height: 812px;
+//   pointer-events: none;
+// }
+
+.lh0 {
+  line-height: 0;
+}
+
 .strip {
   background-size: 8px 8px; /* 控制条纹的大小 */
   background-color: rgb(147, 202, 236);
@@ -368,7 +387,7 @@ function toggleNav() {
 
 header {
   display: flex;
-  position: relative;
+  position: sticky;
   align-items: center;
   min-width: 1440px;
   height: 64px;
@@ -376,7 +395,7 @@ header {
   background-color: var(--color-main-highlight);
   color: #fff;
   justify-items: flex-start;
-  z-index: 101;
+  z-index: 0;
 
   .title {
     margin: 0 20px;
@@ -462,10 +481,6 @@ main {
   background: #f0f0f2;
 }
 
-.grayscale {
-  filter: grayscale(1);
-}
-
 .sections {
   position: relative;
   margin: 0 auto;
@@ -495,13 +510,14 @@ main {
     user-select: none;
     -webkit-user-select: none;
     z-index: 102;
+    // box-sizing: content-box;
     &::before {
       content: '';
       position: absolute;
       width: 379px;
-      height: 100%;
+      height: calc(100% + 2px);
       left: -2px;
-      top: 0;
+      top: -2px;
       box-sizing: border-box;
       border: 0;
       z-index: 1;
@@ -518,12 +534,12 @@ main {
     position: absolute;
     display: none;
     left: 375px;
-    top: 0px;
+    top: -2px;
     z-index: 101;
     background: #fff;
     border: 1px solid #cccccc;
     border-radius: 0 4px 4px 0;
-    box-shadow: 0px 0px 4px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 2px 0px 2px 0px rgba(0, 0, 0, 0.05);
     li {
       position: relative;
       display: flex;

@@ -4,10 +4,10 @@
     <icon id="#-ico-help" class="iconfont" />
   </div>
   <div class="body">
-    <el-form :model="data" label-width="100px">
+    <el-form :model="data" label-width="100px" @submit.prevent>
       <div class="title">页面</div>
       <el-form-item label="页面标题" class="between">
-        <el-input v-model="data.title" placeholder="请填写页面名称，不超过8个汉字" />
+        <el-input v-model="data.title" maxlength="20" show-word-limit />
       </el-form-item>
       <el-form-item label="背景色">
         <ColorPicker v-model="data.bgColor" size="medium" modebar="none"></ColorPicker>
@@ -20,7 +20,11 @@
         </el-upload>
       </el-form-item> -->
       <el-form-item label="灰白模式">
-        <el-switch v-model="data.grayscale" />
+        <el-radio-group v-model="data.grayscale">
+          <el-radio-button label="off">关闭</el-radio-button>
+          <el-radio-button label="all">整页</el-radio-button>
+          <el-radio-button label="first">首屏</el-radio-button>
+        </el-radio-group>
       </el-form-item>
       <el-divider />
       <div class="title" style="display: flex; align-items: center"><span style="padding-right: 12px">标题栏</span><el-switch v-model="data.navbar" /></div>
