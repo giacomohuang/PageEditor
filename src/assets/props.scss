@@ -15,28 +15,28 @@
 .icon {
   color: #ccc;
   font-size: 20px;
-  
+
   &:hover {
     color: var(--color-main-highlight);
-    cursor:pointer;
+    cursor: pointer;
   }
 }
 .body {
   padding: 20px 12px;
-  .icon{
-    font-size:18px;
-    color:var(--vt-c-text-light-1);
+  .icon {
+    font-size: 18px;
+    color: var(--vt-c-text-light-1);
   }
-  .is-active .icon{
-    color:#fff;
+  .is-active .icon {
+    color: #fff;
   }
-  .title{
-    font-size:16px;
-    padding-bottom:12px;
+  .title {
+    font-size: 16px;
+    padding-bottom: 12px;
   }
 }
 
 .val {
-  font-weight:bold;
-  color:var(--vt-c-text-light-1);
+  font-weight: bold;
+  color: var(--vt-c-text-light-1);
 }

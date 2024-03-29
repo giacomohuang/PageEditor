@@ -26,10 +26,10 @@
     <main @click="onClickOutside">
       <div style="margin: 8px 12px; position: absolute; z-index: 150">
         <el-radio-group size="small">
-          <el-radio-button label="小程序" />
-          <el-radio-button label="H5" />
-          <el-radio-button disabled label="Android" />
-          <el-radio-button disabled label="iOS" />
+          <el-radio-button label="小程序" value="小程序" />
+          <el-radio-button label="H5" value="H5" />
+          <el-radio-button disabled label="Android" value="Android" />
+          <el-radio-button disabled label="iOS" value="iOS" />
         </el-radio-group>
       </div>
       <el-scrollbar :native="false" ref="scrollRef">

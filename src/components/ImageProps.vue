@@ -6,11 +6,12 @@
       >{{ mousex }},{{ mousey }}
       <div id="bbbb">zzz</div>
       <div id="aaaa">zzz</div>
+      <div id="cccc" style="border-radius: 10px; width: 10px; height: 10px; border: 1px solid #666; background: #fff"></div>
     </template>
     <div class="wrap">
       <div class="rect-editor">
-        <svg id="canvas" width="640" height="360" class="canvas" @mousedown.stop()="onMouseDownCanvas">
-          <g v-for="(mapArea, index) in data.mapAreas" :id="'group_' + mapArea.id">
+        <svg id="canvas" width="640" height="360" class="canvas" @mousedown.stop="onMouseDownCanvas">
+          <g v-for="(mapArea, index) in data.mapAreas" :id="'group_' + mapArea.id" :key="mapArea.id">
             <rect :id="'rect_' + mapArea.id" :x="mapArea.x" :y="mapArea.y" :width="mapArea.width" :height="mapArea.height" :fill="mapArea.fill" :key="mapArea.id" @mousedown="onMouseDownRect($event, index)"></rect>
           </g>
           <g id="ctrl_group" v-show="editingId !== ''">
@@ -44,7 +45,6 @@
 </template>
 
 <script setup>
-import { ElCheckTag } from 'element-plus'
 import { ref, inject, onMounted, onUnmounted } from 'vue'
 import { nanoid } from 'nanoid'
 const sections = inject('sections')
@@ -56,7 +56,6 @@ const imgHeight = 360
 data.mapAreas = data.mapAreas || []
 const mousex = ref(0)
 const mousey = ref(0)
-const SVG_NS = 'http://www.w3.org/2000/svg'
 const editingId = ref('')
 
 // watch(editingId,async(newValue) => {
@@ -260,52 +259,178 @@ function isInObject(x, y) {
 function onMouseDownRect(ev, index) {
   const mapArea = data.mapAreas[index]
   const bound = document.getElementById('canvas').getBoundingClientRect()
-  const editingEl = document.getElementById('group_' + mapArea.id)
-  const ctrlGroupEl = document.getElementById('ctrl_group')
-  const start = {}
-  const end = {}
-  const dx = ev.clientX - bound.x - mapArea.x
-  const dy = ev.clientY - bound.y - mapArea.y
+  const mouseDownPos = { x: ev.clientX - bound.x - mapArea.x, y: ev.clientY - bound.y - mapArea.y }
   editingId.value = mapArea.id
-  // ctrlGroupEl.style.display = ''
-
   updatePoint('ctrl_nw', mapArea.x, mapArea.y)
   updatePoint('ctrl_ne', mapArea.x + mapArea.width, mapArea.y)
   updatePoint('ctrl_sw', mapArea.x, mapArea.y + mapArea.height)
   updatePoint('ctrl_se', mapArea.x + mapArea.width, mapArea.y + mapArea.height)
   document.addEventListener('mouseup', mouseUp)
   document.addEventListener('mousemove', mouseMove)
+  let offset = { x: mapArea.x, y: mapArea.y }
   function mouseMove(ev) {
-    const temp = {}
-    temp.x = ev.clientX - bound.x - dx
-    temp.y = ev.clientY - bound.y - dy
-    temp.width = mapArea.width
-    temp.height = mapArea.height
+    const movingRect = {}
+    const mouse = { x: ev.clientX - bound.x, y: ev.clientY - bound.y }
+    movingRect.x = mouse.x - mouseDownPos.x
+    movingRect.y = mouse.y - mouseDownPos.y
+    movingRect.width = mapArea.width
+    movingRect.height = mapArea.height
+
+    if (movingRect.x < 0) movingRect.x = 0
+    else if (movingRect.x + movingRect.width > imgWidth) movingRect.x = imgWidth - movingRect.width
+    if (movingRect.y < 0) movingRect.y = 0
+    else if (movingRect.y + movingRect.height > imgHeight) movingRect.y = imgHeight - movingRect.height
+
+    let hit = false
     for (let i = 0; i < data.mapAreas.length; i++) {
       if (i === index) continue
       const rect = data.mapAreas[i]
-      if (isIntersect(temp, rect)) {
-        if (temp.x + temp.width > rect.x) {
-          temp.x = rect.x - mapArea.width
-        } else if (temp.x < rect.x + rect.width) {
-          temp.x = rect.x + rect.width
+
+      // fdgdfg
+      if (isIntersect(movingRect, rect)) {
+        hit = true
+        // const delta_r = Math.abs(mouse.x - rect.x) <= Math.abs(mouse.y - rect.y)
+        const locky = rect.y - movingRect.height
+        // console.log(movingRect.x + movingRect.width - rect.x, rect.y + rect.height - movingRect.y)
+
+        // 左上，dx>dy
+        if (movingRect.x + movingRect.width <= rect.x + rect.width / 2 && movingRect.y <= rect.y + rect.height / 2 && movingRect.x + movingRect.width - rect.x >= movingRect.y + movingRect.height - rect.y) {
+          if (!testA({ x: movingRect.x, y: locky, height: movingRect.height, width: movingRect.width }, index, i)) {
+            console.log('a')
+            movingRect.y = locky
+          } else {
+            // movingRect.x = offset.x
+            movingRect.y = offset.y
+          }
+        }
+        // 左上，dx<dy
+        else if (movingRect.x + movingRect.width <= rect.x + rect.width / 2 && movingRect.y <= rect.y + rect.height / 2 && movingRect.x + movingRect.width - rect.x <= movingRect.y + movingRect.height - rect.y) {
+          const lockx = rect.x - movingRect.width
+          if (!testA({ x: lockx, y: movingRect.y, height: movingRect.height, width: movingRect.width }, index, i)) {
+            console.log('b')
+            movingRect.x = lockx
+          } else {
+            movingRect.x = offset.x
+            // movingRect.y = offset.y
+          }
+        }
+
+        // 左下 dx>dy
+        else if (movingRect.x + movingRect.width <= rect.x + rect.width / 2 && movingRect.y >= rect.y + rect.height / 2 && movingRect.x + movingRect.width - rect.x <= rect.y + rect.height - movingRect.y) {
+          const lockx = rect.x - movingRect.width
+          if (!testA({ x: lockx, y: movingRect.y, height: movingRect.height, width: movingRect.width }, index, i)) {
+            console.log('c')
+            movingRect.x = lockx
+          } else {
+            movingRect.x = offset.x
+            // movingRect.y = offset.y
+          }
+        }
+
+        // 左下 dx<dy
+        else if (movingRect.x + movingRect.width <= rect.x + rect.width / 2 && movingRect.y >= rect.y + rect.height / 2 && movingRect.x + movingRect.width - rect.x >= rect.y + rect.height - movingRect.y) {
+          const locky = rect.y + rect.height
+          if (!testA({ x: movingRect.x, y: locky, height: movingRect.height, width: movingRect.width }, index, i)) {
+            console.log('d')
+            movingRect.y = locky
+          } else {
+            // movingRect.x = offset.x
+            movingRect.y = offset.y
+          }
+        }
+
+        // 右下 dx>dy
+        else if (movingRect.x <= rect.x + rect.width && movingRect.y >= rect.y + rect.height / 2 && rect.x + rect.width - movingRect.x >= rect.y + rect.height - movingRect.y) {
+          const locky = rect.y + rect.height
+          if (!testA({ x: movingRect.x, y: locky, height: movingRect.height, width: movingRect.width }, index, i)) {
+            console.log('e')
+            movingRect.y = locky
+          } else {
+            // movingRect.x = offset.x
+            console.log(i, index)
+            movingRect.y = offset.y
+          }
+        }
+
+        // 右下 dx<dy
+        else if (movingRect.x <= rect.x + rect.width && movingRect.y >= rect.y + rect.height / 2 && rect.x + rect.width - movingRect.x <= rect.y + rect.height - movingRect.y) {
+          const lockx = rect.x + rect.width
+          if (!testA({ x: movingRect.x, y: rect.y, height: movingRect.height, width: movingRect.width }, index, i, 'f')) {
+            console.log('f')
+            movingRect.x = lockx
+          } else {
+            movingRect.x = offset.x
+            // movingRect.y = offset.y
+          }
+        }
+
+        // 右上 dx<dy
+        else if (movingRect.x <= rect.x + rect.width && movingRect.y <= rect.y + rect.height / 2 && rect.x + rect.width - movingRect.x <= movingRect.y + movingRect.height - rect.y) {
+          const lockx = rect.x + rect.width
+          if (!testA({ x: lockx, y: movingRect.y, height: movingRect.height, width: movingRect.width }, index, i)) {
+            console.log('g')
+            movingRect.x = lockx
+          } else {
+            movingRect.x = offset.x
+            // movingRect.y = offset.y
+          }
+        }
+
+        // 右上 dx<dy
+        else if (movingRect.x <= rect.x + rect.width && movingRect.y <= rect.y + rect.height / 2 && rect.x + rect.width - movingRect.x >= movingRect.y + movingRect.height - rect.y) {
+          const locky = rect.y - movingRect.height
+          if (!testA({ x: movingRect.x, y: locky, height: movingRect.height, width: movingRect.width }, index, i)) {
+            console.log('h')
+            movingRect.y = locky
+          } else {
+            // movingRect.x = offset.x
+            movingRect.y = offset.y
+          }
+        }
+        // aaa
+        else {
+          console.log('漏网')
         }
       }
     }
-    if (temp.x < 0) temp.x = 0
-    else if (temp.x + temp.width > imgWidth) temp.x = imgWidth - temp.width
-    if (temp.y < 0) temp.y = 0
-    else if (temp.y + temp.height > imgHeight) temp.y = imgHeight - temp.height
 
-    // if (temp.x < 0) temp.x = 0
-    // if (temp.y < 0) temp.y = 0
-    mapArea.x = temp.x
-    mapArea.y = temp.y
+    if (hit) {
+      document.getElementById('cccc').style.backgroundColor = 'red'
+    } else {
+      document.getElementById('cccc').style.backgroundColor = '#fff'
+    }
+
+    mapArea.x = movingRect.x
+    mapArea.y = movingRect.y
+    offset.x = movingRect.x
+    offset.y = movingRect.y
     updatePoint('ctrl_nw', mapArea.x, mapArea.y)
     updatePoint('ctrl_ne', mapArea.x + mapArea.width, mapArea.y)
     updatePoint('ctrl_sw', mapArea.x, mapArea.y + mapArea.height)
     updatePoint('ctrl_se', mapArea.x + mapArea.width, mapArea.y + mapArea.height)
+    document.getElementById('aaaa').innerHTML = 'movingRect:' + index + JSON.stringify(movingRect)
+    document.getElementById('bbbb').innerHTML = 'offset:' + JSON.stringify(offset)
   }
+
+  function testA(dragRect, index, index2, x) {
+    // if (isOutOfBound(dragRect.x, dragRect.y, dragRect.width, dragRect.height)) return true
+    for (let i = 0; i < data.mapAreas.length; i++) {
+      if (i == index || i == index2) continue
+      const rect = data.mapAreas[i]
+      if (isIntersect(dragRect, rect)) {
+        console.log(index, 'in:', i + 1, index2, x)
+        return true
+      }
+    }
+  }
+
+  function isOutOfBound(x, y, width, height) {
+    if (x < 0 || x + width > imgWidth || y < 0 || y + height > imgHeight) {
+      console.log('outofbound')
+      return true
+    }
+  }
+
   function mouseUp() {
     document.removeEventListener('mousemove', mouseMove)
     document.removeEventListener('mouseup', mouseUp)

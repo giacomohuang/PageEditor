@@ -7,18 +7,18 @@
     <el-form :model="data" label-width="100px">
       <el-form-item label="样式" class="between">
         <el-radio-group v-model="data.style" @change="onStyleChange">
-          <el-radio-button label="normal">常规</el-radio-button>
-          <el-radio-button label="rudder1">舵式1</el-radio-button>
-          <el-radio-button label="rudder2">舵式2</el-radio-button>
+          <el-radio-button value="normal">常规</el-radio-button>
+          <el-radio-button value="rudder1">舵式1</el-radio-button>
+          <el-radio-button value="rudder2">舵式2</el-radio-button>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="按钮数量">
         <el-radio-group v-model="data.btnNum">
-          <el-radio-button :label="1" :disabled="data.style === 'rudder1' || data.style === 'rudder2'">1</el-radio-button>
-          <el-radio-button :label="2" :disabled="data.style === 'rudder1' || data.style === 'rudder2'">2</el-radio-button>
-          <el-radio-button :label="3">3</el-radio-button>
-          <el-radio-button :label="4" :disabled="data.style === 'rudder1' || data.style === 'rudder2'">4</el-radio-button>
-          <el-radio-button :label="5">5</el-radio-button>
+          <el-radio-button value="1" :disabled="data.style === 'rudder1' || data.style === 'rudder2'">1</el-radio-button>
+          <el-radio-button value="2" :disabled="data.style === 'rudder1' || data.style === 'rudder2'">2</el-radio-button>
+          <el-radio-button value="3">3</el-radio-button>
+          <el-radio-button value="4" :disabled="data.style === 'rudder1' || data.style === 'rudder2'">4</el-radio-button>
+          <el-radio-button value="5">5</el-radio-button>
         </el-radio-group>
       </el-form-item>
       <div class="upload-tips">

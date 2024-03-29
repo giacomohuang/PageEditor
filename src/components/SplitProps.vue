@@ -8,17 +8,17 @@
       <el-form-item label="线型" class="h40">
         <div class="val pr12">{{ typeEnum.getDesc(data.type) }}</div>
         <el-radio-group v-model="data.type" size="small">
-          <el-radio-button label="line"><icon id="#-ico-splitline" /></el-radio-button>
-          <el-radio-button label="gap"><icon id="#-ico-splitgap" /></el-radio-button>
+          <el-radio-button value="line"><icon id="#-ico-splitline" /></el-radio-button>
+          <el-radio-button value="gap"><icon id="#-ico-splitgap" /></el-radio-button>
         </el-radio-group>
       </el-form-item>
 
       <el-form-item label="线型" class="h40" v-show="data.type === 'line'">
         <div class="val pr12">{{ lineTypeEnum.getDesc(data.lineType) }}</div>
         <el-radio-group v-model="data.lineType" size="small">
-          <el-radio-button label="solid"><icon id="#-ico-solid" /></el-radio-button>
-          <el-radio-button label="dashed"><icon id="#-ico-dashed" /></el-radio-button>
-          <el-radio-button label="dotted"><icon id="#-ico-dotted" /></el-radio-button>
+          <el-radio-button value="solid"><icon id="#-ico-solid" /></el-radio-button>
+          <el-radio-button value="dashed"><icon id="#-ico-dashed" /></el-radio-button>
+          <el-radio-button value="dotted"><icon id="#-ico-dotted" /></el-radio-button>
         </el-radio-group>
       </el-form-item>
 

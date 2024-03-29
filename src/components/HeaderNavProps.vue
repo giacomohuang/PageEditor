@@ -21,18 +21,18 @@
       </el-form-item> -->
       <el-form-item label="灰白模式">
         <el-radio-group v-model="data.grayscale">
-          <el-radio-button label="off">关闭</el-radio-button>
-          <el-radio-button label="all">整页</el-radio-button>
-          <el-radio-button label="first">首屏</el-radio-button>
+          <el-radio-button value="off">关闭</el-radio-button>
+          <el-radio-button value="all">整页</el-radio-button>
+          <el-radio-button value="first">首屏</el-radio-button>
         </el-radio-group>
       </el-form-item>
       <el-divider />
       <div class="title" style="display: flex; align-items: center"><span style="padding-right: 12px">标题栏</span><el-switch v-model="data.navbar" /></div>
       <el-form-item label="标题栏风格">
         <el-radio-group v-model="data.navStyle">
-          <el-radio-button label="fixed">固顶</el-radio-button>
-          <el-radio-button label="scroll">滚动</el-radio-button>
-          <el-radio-button label="custom">沉浸式</el-radio-button>
+          <el-radio-button value="fixed">固顶</el-radio-button>
+          <el-radio-button value="scroll">滚动</el-radio-button>
+          <el-radio-button value="custom">沉浸式</el-radio-button>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="背景色">
@@ -41,9 +41,9 @@
       </el-form-item>
       <el-form-item label="标题">
         <el-radio-group v-model="data.titleType" style="">
-          <el-radio-button label="none">无</el-radio-button>
-          <el-radio-button label="text">文字</el-radio-button>
-          <el-radio-button label="image">图片</el-radio-button>
+          <el-radio-button value="none">无</el-radio-button>
+          <el-radio-button value="text">文字</el-radio-button>
+          <el-radio-button value="image">图片</el-radio-button>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="功能按钮">
