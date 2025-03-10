@@ -1,3 +1,3 @@
 <template>
-  <div>Text</div>
+  <div style="heigth: 200px">Text</div>
 </template>

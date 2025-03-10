@@ -1,5 +1,5 @@
 <template>
-  <img src="https://s2.loli.net/2023/12/15/vtxoKka8s3CjLDA.png" style="width: 375px" hotarea />
+  <img src="https://s2.loli.net/2023/12/15/vtxoKka8s3CjLDA.png" style="width: 375px; font-size: 0; vertical-align: bottom" hotarea />
 </template>
 <script setup>
 import { inject } from 'vue'

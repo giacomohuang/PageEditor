@@ -42,7 +42,7 @@
           <!--body -->
           <draggable forceFallback="true" handle=".handle" scrollSensitivity="200" @start="dragStart" @end="dragEnd" class="body" :list="sections" item-key="id" chosen-class="section-chosen" ghost-class="section-ghost" group="comp" @change="onSectionDropped">
             <template #item="{ element, index }">
-              <div class="lh0">
+              <div>
                 <div class="relative">
                   <div class="item handle" :class="{ active: index === selectedSectionIdx, dragfix: dragging }" @mousedown.stop="editComponent($event, index)">
                     <component :is="componentList[element.type]" :index="index" :key="element.id"></component>
