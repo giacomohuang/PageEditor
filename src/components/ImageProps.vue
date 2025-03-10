@@ -241,9 +241,9 @@ function hitTest(rectDrag, start, end, id) {
   return rectDrag
 }
 
-function getRadomElement(arr) {
-  return arr[Math.floor(Math.random() * arr.length)]
-}
+// function getRadomElement(arr) {
+//   return arr[Math.floor(Math.random() * arr.length)]
+// }
 
 function isInObject(x, y) {
   let flag = false
@@ -267,7 +267,8 @@ function onMouseDownRect(ev, index) {
   updatePoint('ctrl_se', mapArea.x + mapArea.width, mapArea.y + mapArea.height)
   document.addEventListener('mouseup', mouseUp)
   document.addEventListener('mousemove', mouseMove)
-  let offset = { x: mapArea.x, y: mapArea.y }
+  let lockPos = {}
+  let count = 0
   function mouseMove(ev) {
     const movingRect = {}
     const mouse = { x: ev.clientX - bound.x, y: ev.clientY - bound.y }
@@ -282,115 +283,137 @@ function onMouseDownRect(ev, index) {
     else if (movingRect.y + movingRect.height > imgHeight) movingRect.y = imgHeight - movingRect.height
 
     let hit = false
+    console.log('count', count)
+    count++
     for (let i = 0; i < data.mapAreas.length; i++) {
       if (i === index) continue
       const rect = data.mapAreas[i]
-
       // fdgdfg
+
       if (isIntersect(movingRect, rect)) {
         hit = true
-        // const delta_r = Math.abs(mouse.x - rect.x) <= Math.abs(mouse.y - rect.y)
-        const locky = rect.y - movingRect.height
-        // console.log(movingRect.x + movingRect.width - rect.x, rect.y + rect.height - movingRect.y)
-
         // 左上，dx>dy
-        if (movingRect.x + movingRect.width <= rect.x + rect.width / 2 && movingRect.y <= rect.y + rect.height / 2 && movingRect.x + movingRect.width - rect.x >= movingRect.y + movingRect.height - rect.y) {
-          if (!testA({ x: movingRect.x, y: locky, height: movingRect.height, width: movingRect.width }, index, i)) {
-            console.log('a')
-            movingRect.y = locky
-          } else {
-            // movingRect.x = offset.x
-            movingRect.y = offset.y
+        if (movingRect.x + movingRect.width / 2 <= rect.x + rect.width / 2 && movingRect.y + movingRect.height / 2 <= rect.y + rect.height / 2 && movingRect.x + movingRect.width - rect.x >= movingRect.y + movingRect.height - rect.y) {
+          console.log(i + 1 + ':a')
+          if (testA({ x: lockPos.x, y: lockPos.y, width: movingRect.width, height: movingRect.height }, index)) {
+            console.log('aaaaaaaaa')
+            movingRect.x = lockPos.x
+            movingRect.y = lockPos.y
+            return
           }
+          const locky = rect.y - movingRect.height
+          movingRect.y = locky
+          // if (testA({ x: movingRect.x, y: locky, height: movingRect.height, width: movingRect.width }, index, i)) {
+          //   movingRect.x = lockPos.x
+          //   movingRect.y = lockPos.y
+          // } else {
+          //   lockPos.x = movingRect.x
+          //   lockPos.y = locky
+          // }
         }
         // 左上，dx<dy
-        else if (movingRect.x + movingRect.width <= rect.x + rect.width / 2 && movingRect.y <= rect.y + rect.height / 2 && movingRect.x + movingRect.width - rect.x <= movingRect.y + movingRect.height - rect.y) {
-          const lockx = rect.x - movingRect.width
-          if (!testA({ x: lockx, y: movingRect.y, height: movingRect.height, width: movingRect.width }, index, i)) {
-            console.log('b')
-            movingRect.x = lockx
-          } else {
-            movingRect.x = offset.x
-            // movingRect.y = offset.y
+        else if (movingRect.x + movingRect.width / 2 <= rect.x + rect.width / 2 && movingRect.y + movingRect.height / 2 <= rect.y + rect.height / 2 && movingRect.x + movingRect.width - rect.x <= movingRect.y + movingRect.height - rect.y) {
+          console.log(i + 1 + ':b')
+          if (testA({ x: lockPos.x, y: lockPos.y, width: movingRect.width, height: movingRect.height }, index)) {
+            console.log('aaaaaaaaa')
+            movingRect.x = lockPos.x
+            movingRect.y = lockPos.y
+            return
           }
+          const lockx = rect.x - movingRect.width
+          movingRect.x = lockx
+          // if (testA({ x: lockx, y: movingRect.y, height: movingRect.height, width: movingRect.width }, index, i)) {
+          //   movingRect.x = lockPos.x
+          //   movingRect.y = lockPos.y
+          // } else {
+          //   lockPos.x = lockx
+          //   lockPos.y = movingRect.y
+          // }
         }
 
         // 左下 dx>dy
-        else if (movingRect.x + movingRect.width <= rect.x + rect.width / 2 && movingRect.y >= rect.y + rect.height / 2 && movingRect.x + movingRect.width - rect.x <= rect.y + rect.height - movingRect.y) {
+        else if (movingRect.x + movingRect.width / 2 <= rect.x + rect.width / 2 && movingRect.y + movingRect.height / 2 >= rect.y + rect.height / 2 && movingRect.x + movingRect.width - rect.x <= rect.y + rect.height - movingRect.y) {
+          console.log(i + 1 + ':c')
           const lockx = rect.x - movingRect.width
-          if (!testA({ x: lockx, y: movingRect.y, height: movingRect.height, width: movingRect.width }, index, i)) {
-            console.log('c')
-            movingRect.x = lockx
-          } else {
-            movingRect.x = offset.x
-            // movingRect.y = offset.y
-          }
+          movingRect.x = lockx
+          // if (testA({ x: lockx, y: movingRect.y, height: movingRect.height, width: movingRect.width }, index, i)) {
+          //   movingRect.x = lockPos.x
+          //   movingRect.y = lockPos.y
+          // } else {
+          //   lockPos.x = lockx
+          //   lockPos.y = movingRect.y
+          // }
         }
 
         // 左下 dx<dy
-        else if (movingRect.x + movingRect.width <= rect.x + rect.width / 2 && movingRect.y >= rect.y + rect.height / 2 && movingRect.x + movingRect.width - rect.x >= rect.y + rect.height - movingRect.y) {
+        else if (movingRect.x + movingRect.width / 2 <= rect.x + rect.width / 2 && movingRect.y + movingRect.height / 2 >= rect.y + rect.height / 2 && movingRect.x + movingRect.width - rect.x >= rect.y + rect.height - movingRect.y) {
+          console.log(i + 1 + ':d')
           const locky = rect.y + rect.height
-          if (!testA({ x: movingRect.x, y: locky, height: movingRect.height, width: movingRect.width }, index, i)) {
-            console.log('d')
-            movingRect.y = locky
-          } else {
-            // movingRect.x = offset.x
-            movingRect.y = offset.y
-          }
+          movingRect.y = locky
+          // if (testA({ x: movingRect.x, y: locky, height: movingRect.height, width: movingRect.width }, index, i)) {
+          //   movingRect.x = lockPos.x
+          //   movingRect.y = lockPos.y
+          // } else {
+          //   lockPos.x = movingRect.x
+          //   lockPos.y = locky
+          // }
         }
 
         // 右下 dx>dy
-        else if (movingRect.x <= rect.x + rect.width && movingRect.y >= rect.y + rect.height / 2 && rect.x + rect.width - movingRect.x >= rect.y + rect.height - movingRect.y) {
+        else if (movingRect.x + movingRect.width / 2 >= rect.x + rect.width / 2 && movingRect.y + movingRect.height / 2 >= rect.y + rect.height / 2 && rect.x + rect.width - movingRect.x >= rect.y + rect.height - movingRect.y) {
+          console.log(i + 1 + ':e')
           const locky = rect.y + rect.height
-          if (!testA({ x: movingRect.x, y: locky, height: movingRect.height, width: movingRect.width }, index, i)) {
-            console.log('e')
-            movingRect.y = locky
-          } else {
-            // movingRect.x = offset.x
-            console.log(i, index)
-            movingRect.y = offset.y
-          }
+          movingRect.y = locky
+          // if (testA({ x: movingRect.x, y: locky, height: movingRect.height, width: movingRect.width }, index, i)) {
+          //   movingRect.x = lockPos.x
+          //   movingRect.y = lockPos.y
+          // } else {
+          //   lockPos.y = locky
+          // }
         }
 
         // 右下 dx<dy
-        else if (movingRect.x <= rect.x + rect.width && movingRect.y >= rect.y + rect.height / 2 && rect.x + rect.width - movingRect.x <= rect.y + rect.height - movingRect.y) {
+        else if (movingRect.x + movingRect.width / 2 >= rect.x + rect.width / 2 && movingRect.y + movingRect.height / 2 >= rect.y + rect.height / 2 && rect.x + rect.width - movingRect.x <= rect.y + rect.height - movingRect.y) {
+          console.log(i + 1 + ':f')
           const lockx = rect.x + rect.width
-          if (!testA({ x: movingRect.x, y: rect.y, height: movingRect.height, width: movingRect.width }, index, i, 'f')) {
-            console.log('f')
-            movingRect.x = lockx
-          } else {
-            movingRect.x = offset.x
-            // movingRect.y = offset.y
-          }
+          movingRect.x = lockx
+          // if (testA({ x: lockx, y: movingRect.y, height: movingRect.height, width: movingRect.width }, index, i)) {
+          //   movingRect.x = lockPos.x
+          //   movingRect.y = lockPos.y
+          // } else {
+          //   lockPos.x = lockx
+          //   lockPos.y = movingRect.y
+          // }
         }
 
         // 右上 dx<dy
-        else if (movingRect.x <= rect.x + rect.width && movingRect.y <= rect.y + rect.height / 2 && rect.x + rect.width - movingRect.x <= movingRect.y + movingRect.height - rect.y) {
+        else if (movingRect.x + movingRect.width / 2 >= rect.x + rect.width / 2 && movingRect.y + movingRect.height / 2 <= rect.y + rect.height / 2 && rect.x + rect.width - movingRect.x <= movingRect.y + movingRect.height - rect.y) {
+          console.log(i + 1 + ':g')
           const lockx = rect.x + rect.width
-          if (!testA({ x: lockx, y: movingRect.y, height: movingRect.height, width: movingRect.width }, index, i)) {
-            console.log('g')
-            movingRect.x = lockx
-          } else {
-            movingRect.x = offset.x
-            // movingRect.y = offset.y
-          }
+          movingRect.x = lockx
+          // if (testA({ x: lockx, y: movingRect.y, height: movingRect.height, width: movingRect.width }, index, i)) {
+          //   movingRect.x = lockPos.x
+          //   movingRect.y = lockPos.y
+          // } else {
+          //   lockPos.x = lockx
+          //   lockPos.y = movingRect.y
+          // }
         }
 
         // 右上 dx<dy
-        else if (movingRect.x <= rect.x + rect.width && movingRect.y <= rect.y + rect.height / 2 && rect.x + rect.width - movingRect.x >= movingRect.y + movingRect.height - rect.y) {
+        else if (movingRect.x + movingRect.width / 2 >= rect.x + rect.width / 2 && movingRect.y + movingRect.height / 2 <= rect.y + rect.height / 2 && rect.x + rect.width - movingRect.x >= movingRect.y + movingRect.height - rect.y) {
+          console.log(i + 1 + ':h')
           const locky = rect.y - movingRect.height
-          if (!testA({ x: movingRect.x, y: locky, height: movingRect.height, width: movingRect.width }, index, i)) {
-            console.log('h')
-            movingRect.y = locky
-          } else {
-            // movingRect.x = offset.x
-            movingRect.y = offset.y
-          }
+          movingRect.y = locky
+          // if (testA({ x: movingRect.x, y: locky, height: movingRect.height, width: movingRect.width }, index, i)) {
+          //   movingRect.x = lockPos.x
+          //   movingRect.y = lockPos.y
+          // } else {
+          //   lockPos.x = movingRect.x
+          //   lockPos.y = locky
+          // }
         }
         // aaa
-        else {
-          console.log('漏网')
-        }
       }
     }
 
@@ -398,27 +421,28 @@ function onMouseDownRect(ev, index) {
       document.getElementById('cccc').style.backgroundColor = 'red'
     } else {
       document.getElementById('cccc').style.backgroundColor = '#fff'
+      lockPos.x = movingRect.x
+      lockPos.y = movingRect.y
     }
+    hit = false
 
     mapArea.x = movingRect.x
     mapArea.y = movingRect.y
-    offset.x = movingRect.x
-    offset.y = movingRect.y
     updatePoint('ctrl_nw', mapArea.x, mapArea.y)
     updatePoint('ctrl_ne', mapArea.x + mapArea.width, mapArea.y)
     updatePoint('ctrl_sw', mapArea.x, mapArea.y + mapArea.height)
     updatePoint('ctrl_se', mapArea.x + mapArea.width, mapArea.y + mapArea.height)
     document.getElementById('aaaa').innerHTML = 'movingRect:' + index + JSON.stringify(movingRect)
-    document.getElementById('bbbb').innerHTML = 'offset:' + JSON.stringify(offset)
+    document.getElementById('bbbb').innerHTML = 'lockPos:' + JSON.stringify(lockPos)
   }
 
-  function testA(dragRect, index, index2, x) {
+  function testA(dragRect, index, index2) {
     // if (isOutOfBound(dragRect.x, dragRect.y, dragRect.width, dragRect.height)) return true
     for (let i = 0; i < data.mapAreas.length; i++) {
       if (i == index || i == index2) continue
       const rect = data.mapAreas[i]
       if (isIntersect(dragRect, rect)) {
-        console.log(index, 'in:', i + 1, index2, x)
+        // console.log(index, 'in:', i + 1)
         return true
       }
     }
