@@ -1,35 +1,100 @@
-# PageEditor
+# PageEditor 微页面编辑器
 
-This template should help get you started developing with Vue 3 in Vite.
+PageEditor是一个基于Vue 3的可视化页面编辑器，允许用户通过拖放组件的方式设计和构建自定义页面。这个工具特别适合用于构建小程序或H5页面，无需编写代码即可创建丰富的交互式页面。
 
-## Recommended IDE Setup
+## 功能特点
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+- **拖拽式设计**：直观的拖放界面，轻松构建页面布局
+- **多组件支持**：内置多种常用组件，包括：
+  - 文本组件
+  - 富文本组件
+  - 图片组件
+  - 轮播图组件
+  - 分割线组件
+  - 页面页眉
+  - 页面页脚
+- **实时预览**：即时查看设计效果
+- **响应式设计**：支持多种设备预览（小程序、H5等）
+- **样式自定义**：每个组件都有丰富的样式配置选项
+- **一键保存与发布**：便捷的保存和部署流程
 
-## Customize configuration
+## 技术栈
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+- Vue 3 - 前端框架
+- Vite - 构建工具
+- Element Plus - UI组件库
+- Vue Router - 路由管理
+- Vuedraggable - 拖拽功能实现
+- SCSS - 样式预处理器
 
-## Project Setup
+## 项目设置
 
-```sh
+### 环境要求
+
+- Node.js 16.0+
+- npm 7.0+
+
+### 安装依赖
+
+```bash
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### 开发环境运行
 
-```sh
+```bash
 npm run dev
 ```
 
-### Compile and Minify for Production
+### 生产环境构建
 
-```sh
+```bash
 npm run build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+### 代码格式化和检查
 
-```sh
+```bash
+# 格式化代码
+npm run format
+
+# 代码检查
 npm run lint
 ```
+
+## 项目结构
+
+```
+src/
+├── assets/         # 静态资源
+├── components/     # 组件库
+│   ├── Components.js     # 组件注册和配置
+│   ├── Image.vue         # 图片组件
+│   ├── Text.vue          # 文本组件
+│   └── ...
+├── views/          # 页面视图
+│   └── Editorview.vue    # 主编辑器视图
+├── router/         # 路由配置
+├── base/           # 基础功能模块
+└── main.js         # 应用入口文件
+```
+
+## 使用指南
+
+1. 启动应用后，进入编辑器页面
+2. 从左侧组件面板选择需要的组件
+3. 将组件拖放到中央画布区域
+4. 点击已添加的组件进行属性编辑
+5. 使用顶部的预览按钮查看实际效果
+6. 完成编辑后保存或发布页面
+
+## 浏览器兼容性
+
+- Chrome (最新版本)
+- Firefox (最新版本)
+- Safari (最新版本)
+- Edge (最新版本)
+
+## 许可证
+
+[MIT](LICENSE)
